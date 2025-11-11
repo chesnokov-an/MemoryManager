@@ -3,34 +3,36 @@
 
 #include <string>
 #include <memory>
-#include "Memory/VariableDescriptor.hpp"
+#include <Memory/VariableDescriptor.hpp>
 
 namespace MemoryNameSpace{
 
-class ReferenceDescriptor final : public MemoryElement{
+class ReferenceDescriptor final : public IMemoryElement{
 private:
-    std::unique_ptr<MemoryElement> pointer_;
+    std::string name_;
+    IMemoryElement* pointer_;
 
 public:
     ReferenceDescriptor(const std::string& name, MemoryElement* pointer)
-            : MemoryElement(name), pointer_(pointer) {};
+            : name_(name), pointer_(pointer) {};
 
-    std::byte* data(std::byte* buffer) override {
-         return pointer_->data(buffer);
+    const std::string& get_name() const noexcept override {
+        return pointer_->get_name();
     }
-
-    const std::byte* data(std::byte* buffer) const override {
-        return pointer_->data(buffer);
+    size_t get_size() const noexcept override {
+        return pointer_->get_size();
     }
-
-    void set_data(std::byte* buffer, const std::byte* data) override {
-        pointer_->set_data(buffer, data);
+    bool is_valid() const noexcept override {
+        return pointer_->is_valid();
     }
-
-    bool is_valid() override {
-        if(pointer_ == nullptr || pointer_->is_valid() == false)
-            valid_ = false;
-        return valid_;
+    void get_value(IBuffer* buffer, const std::byte* value) const {
+        pointer_->get_value(buffer, value);
+    }
+    void set_value(IBuffer* buffer, const std::byte* value) override {
+        pointer_->set_value(buffer, value);
+    }
+    const std::string& get_ref_name() const noexcept {
+        return name_;
     }
 };
 
