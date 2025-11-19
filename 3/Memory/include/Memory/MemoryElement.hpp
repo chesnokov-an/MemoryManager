@@ -27,17 +27,11 @@ protected:
 public:
     MemoryElement(const std::string& name, size_t size, size_t offset)
             : name_(name), size_(size), offset_(offset), valid_(true) {};
-    const std::string& get_name() const noexcept { return name_; }
-    size_t get_size() const noexcept { return size_; }
-    bool is_valid() const noexcept { return valid_; }
-    void get_value(IBuffer* buffer, const std::byte* value) const override {
-        std::byte* target = buffer->get_data() + offset_;
-        std::copy(target, target + size_, value);
-    }
-    void set_value(IBuffer* buffer, const std::byte* value) override {
-        std::byte* target = buffer->get_data() + offset_;
-        std::copy(value, value + size_, target);
-    }
+    const std::string& get_name() const noexcept;
+    size_t get_size() const noexcept;
+    bool is_valid() const noexcept;
+    void get_value(IBuffer* buffer, const std::byte* value) const override;
+    void set_value(IBuffer* buffer, const std::byte* value) override;
     virtual void make_abstract() const noexcept = 0;
     virtual ~MemoryElement(){};
 };

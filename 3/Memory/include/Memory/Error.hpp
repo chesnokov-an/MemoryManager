@@ -7,7 +7,7 @@ namespace MemoryNameSpace{
 
 enum error_t {
     SIZE_ERROR = 1,
-    MEMORY_LEAKDOUBLEFREE = 2,
+    MEMORY_LEAK = 2,
     DOUBLE_FREE = 3,
     ACCESS_ERROR = 4,
 };

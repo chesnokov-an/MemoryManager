@@ -20,12 +20,12 @@ private:
     std::string file_path_;
     size_t memory_limit_;
     std::unordered_map<std::string, IMemoryElement*> memory_elements_;
-    Manager& manager_;
+    IManager& manager_;
 
 public:
-    VariableDescriptor allocate_variable(const std::string& name, size_t size){
+    // VariableDescriptor allocate_variable(const std::string& name, size_t size){
 
-    }
+    // }
 };
 
 }

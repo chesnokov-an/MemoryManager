@@ -12,10 +12,7 @@ class VariableDescriptor final : public MemoryElement{
 public:
     VariableDescriptor(const std::string& name, size_t size, size_t offset)
             : MemoryElement(name, size, offset) {};
-
-    ReferenceDescriptor make_reference(std::string name){
-        return ReferenceDescriptor{name, this};
-    }
+    ReferenceDescriptor make_reference(std::string name);
 };
 
 }
