@@ -19,7 +19,6 @@ public:
     void get_value(IBuffer* buffer, size_t begin, size_t end, const std::byte* value) const;
     using MemoryElement::set_value;
     void set_value(IBuffer* buffer, size_t index, const std::byte* value);
-    ReferenceDescriptor make_reference(std::string name);
 };
 
 }

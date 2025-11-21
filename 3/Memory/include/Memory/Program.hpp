@@ -23,6 +23,7 @@ private:
     IManager& manager_;
 
 public:
+    const std::string& get_name() const;
     // VariableDescriptor allocate_variable(const std::string& name, size_t size){
 
     // }

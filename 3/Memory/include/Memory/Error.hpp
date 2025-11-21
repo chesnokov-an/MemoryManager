@@ -16,6 +16,10 @@ class Error final{
 private:
     error_t type_;
     Program& program_;
+
+public:
+    Error(int type, Program& program) : type_(static_cast<error_t>(type)), program_(program) {}
+    std::string get_description();
 };
 
 }

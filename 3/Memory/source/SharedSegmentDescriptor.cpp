@@ -1,19 +1,20 @@
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <Memory/MemoryElement.hpp>
-#include <Memory/ArrayDescriptor.hpp>
-#include <Memory/Program.hpp>
+#include <Memory/SharedSegmentDescriptor.hpp>
 
 namespace MemoryNameSpace{
 
 void SharedSegmentDescriptor::insert_program(Program* program){
-    programs_.push_back(program);
+    programs_.insert({program->get_name(), program});
 }
-void SharedSegmentDescriptor::erase_program(Program* program){
-    auto it = std::find_if(programs_.begin(), programs_.end(),
-                            [&program](Program* cur_program){ return cur_program == program; });
+
+void SharedSegmentDescriptor::erase_program(const std::string& name){
+    auto it = programs_.find(name);
     if(it != programs_.end()) programs_.erase(it);
+}
+
+bool SharedSegmentDescriptor::check_access(const std::string& name) const {
+    auto it = programs_.find(name);
+    if(it != programs_.end()) return true;
+    return false;
 }
 
 }

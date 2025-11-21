@@ -1,13 +1,9 @@
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <Memory/Manager.hpp>
-#include <Memory/MemoryElement.hpp>
-#include <Memory/VariableDescriptor.hpp>
-#include <Memory/ArrayDescriptor.hpp>
-#include <Memory/SharedSegmentDescriptor.hpp>
-#include <Memory/ReferenceDescriptor.hpp>
+#include <Memory/Program.hpp>
 
 namespace MemoryNameSpace{
+
+const std::string& Program::get_name() const {
+    return name_;
+}
 
 }

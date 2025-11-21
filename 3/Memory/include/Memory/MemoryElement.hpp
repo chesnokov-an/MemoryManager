@@ -4,6 +4,7 @@
 #include <string>
 #include <cstddef>
 #include <Memory/Buffer.hpp>
+#include <Memory/ReferenceDescriptor.hpp>
 
 namespace MemoryNameSpace{
 
@@ -32,6 +33,7 @@ public:
     bool is_valid() const noexcept;
     void get_value(IBuffer* buffer, const std::byte* value) const override;
     void set_value(IBuffer* buffer, const std::byte* value) override;
+    virtual ReferenceDescriptor make_reference(std::string name);
     virtual void make_abstract() const noexcept = 0;
     virtual ~MemoryElement(){};
 };
