@@ -2,7 +2,7 @@
 
 namespace MemoryNameSpace{
 
-void SharedSegmentDescriptor::insert_program(Program* program){
+void SharedSegmentDescriptor::insert_program(const Program* program){
     programs_.insert({program->get_name(), program});
 }
 

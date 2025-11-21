@@ -4,12 +4,15 @@
 #include <string>
 #include <cstddef>
 #include <Memory/Buffer.hpp>
+#include <Memory/Manager.hpp>
 #include <Memory/ReferenceDescriptor.hpp>
 
 namespace MemoryNameSpace{
 
 class IMemoryElement{
 public:
+    friend class IManager;
+
     virtual const std::string& get_name() const noexcept = 0;
     virtual size_t get_size() const noexcept = 0;
     virtual bool is_valid() const noexcept = 0;

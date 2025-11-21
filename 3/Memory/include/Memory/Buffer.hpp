@@ -53,6 +53,7 @@ public:
         }
         return offset_res;
     }
+    
     void destroy_block(size_t offset, size_t size) override {
         if((offset > capacity_) || (size > capacity_ - offset)) throw std::out_of_range("Invalid offset to destroy");
         auto it = std::upper_bound(blocks_.begin(), blocks_.end(), offset,

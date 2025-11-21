@@ -4,7 +4,6 @@
 #include <string>
 #include <cstddef>
 #include <Memory/MemoryElement.hpp>
-#include <Memory/ReferenceDescriptor.hpp>
 
 namespace MemoryNameSpace{
 
