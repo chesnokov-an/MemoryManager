@@ -1,4 +1,5 @@
 #include <Memory/Program.hpp>
+#include <Memory/Manager.hpp>
 
 namespace MemoryNameSpace{
 

@@ -8,4 +8,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -g")
 
 add_executable (Main source/main.cpp)
 
-target_link_libraries(Main HashTable Memory Utils Dialogue)
+target_link_libraries(Main Memory Utils Dialogue)

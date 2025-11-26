@@ -8,7 +8,7 @@ size_t MemoryElement::get_size() const noexcept { return size_; }
 
 size_t MemoryElement::get_offset() const noexcept { return offset_; }
 
-void MemoryElement::get_value(IBuffer* buffer, const std::byte* value) const {
+void MemoryElement::get_value(IBuffer* buffer, std::byte* value) const {
     std::byte* target = buffer->get_data() + offset_;
     std::copy(target, target + size_, value);
 }

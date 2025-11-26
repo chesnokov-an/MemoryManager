@@ -4,16 +4,11 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <Memory/Manager.hpp>
-#include <Memory/MemoryElement.hpp>
-#include <Memory/VariableDescriptor.hpp>
-#include <Memory/ArrayDescriptor.hpp>
-#include <Memory/SharedSegmentDescriptor.hpp>
-#include <Memory/ReferenceDescriptor.hpp>
-#include <Memory/Error.hpp>
-
 
 namespace MemoryNameSpace{
+
+class IMemoryElement;  // forward
+class IManager;  // forward
 
 class Program final{
 private:
@@ -26,7 +21,7 @@ private:
 
 private:
     template <typename Alloc, typename... ExtraArgs>
-    bool Program::allocate_element(const std::string& name, size_t size, Alloc&& allocator, ExtraArgs&&... args);
+    bool allocate_element(const std::string& name, size_t size, Alloc&& allocator, ExtraArgs&&... args);
 
 public:
     Program(std::string name, std::string file_path, size_t memory_limit, IManager& manager)

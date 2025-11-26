@@ -5,7 +5,8 @@
 #include <array>
 #include <vector>
 #include <algorithm>
-#include <exception>
+#include <stdexcept>
+#include <string>
 
 namespace MemoryNameSpace{
 
@@ -58,7 +59,7 @@ public:
         if((offset > capacity_) || (size > capacity_ - offset))
             throw std::out_of_range("Invalid offset " + std::to_string(offset) + " with size " + std::to_string(size) + ".");
         auto it = std::upper_bound(blocks_.begin(), blocks_.end(), offset,
-                                [](size_t offset, const Block& block){ return offset < block.offset });
+                                [](size_t offset, const Block& block){ return offset < block.offset; });
         auto prev = (it != blocks_.begin()) ? std::prev(it) : blocks_.end();
         if(((it != blocks_.end()) && (offset + size > it->offset)) || ((it != blocks_.begin()) && (prev->offset + prev->size > offset)))
             throw std::runtime_error("Double free.");

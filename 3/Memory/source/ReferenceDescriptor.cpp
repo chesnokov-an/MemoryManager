@@ -1,4 +1,7 @@
 #include <Memory/ReferenceDescriptor.hpp>
+#include <Memory/MemoryElement.hpp>
+#include <Memory/Manager.hpp>
+#include <Memory/Buffer.hpp>
 
 namespace MemoryNameSpace{
 

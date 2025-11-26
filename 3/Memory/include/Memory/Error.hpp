@@ -2,9 +2,11 @@
 #define ERROR_HPP
 
 #include <string>
-#include <Memory/Program.hpp>
+#include <vector>
 
 namespace MemoryNameSpace{
+
+class Program;    // forward
 
 enum error_t {
     SIZE_ERROR = 0,

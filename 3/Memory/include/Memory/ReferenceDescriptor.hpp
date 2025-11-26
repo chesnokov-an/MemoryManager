@@ -3,9 +3,12 @@
 
 #include <string>
 #include <memory>
-#include <Memory/MemoryElement.hpp>
 
 namespace MemoryNameSpace{
+
+class IMemoryElement;
+class IManager;
+class IBuffer;
 
 class ReferenceDescriptor final : public IMemoryElement{
 private:
@@ -23,7 +26,7 @@ public:
     size_t get_size() const noexcept override;
     size_t get_offset() const noexcept override;
     bool is_valid() const noexcept;
-    void get_value(IBuffer* buffer, const std::byte* value) const override;
+    void get_value(IBuffer* buffer, std::byte* value) const override;
     void set_value(IBuffer* buffer, const std::byte* value) override;
     const std::string& get_ref_name() const noexcept;
 };

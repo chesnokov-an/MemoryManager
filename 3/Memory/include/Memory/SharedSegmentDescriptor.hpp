@@ -4,7 +4,6 @@
 #include <string>
 #include <unordered_map>
 #include <algorithm>
-#include <Memory/MemoryElement.hpp>
 #include <Memory/ArrayDescriptor.hpp>
 #include <Memory/Program.hpp>
 

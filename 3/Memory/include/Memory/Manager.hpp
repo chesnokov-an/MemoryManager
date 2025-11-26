@@ -7,9 +7,18 @@
 #include <optional>
 #include <Memory/Buffer.hpp>
 #include <Memory/MemoryElement.hpp>
+#include <Memory/VariableDescriptor.hpp>
+#include <Memory/ArrayDescriptor.hpp>
+#include <Memory/SharedSegmentDescriptor.hpp>
 #include <Memory/Error.hpp>
 
 namespace MemoryNameSpace{
+
+class VariableDescriptor;          // forward
+class ArrayDescriptor;             // forward
+class SharedSegmentDescriptor;     // forward
+class ReferenceDescriptor;         // forward
+class IMemoryElement;              // forward
 
 class IManager {
 public:
@@ -22,7 +31,7 @@ public:
     virtual void record_error(size_t type, std::string description, const Program& program) = 0;
 };
 
-template <typename capacity_>
+template <size_t capacity_>
 class Manager final : public IManager {
 private:
     std::unique_ptr<IBuffer> buffer_;
@@ -33,7 +42,7 @@ private:
 private:
     std::optional<size_t> valid_allocate(size_t size, const Program& program){
         size_t offset = 0;
-        try{ offset = buffer_.allocate_block(size); }
+        try{ offset = buffer_->allocate_block(size); }
         catch(const std::runtime_error& e){
             error_log_.push_back(Error{SIZE_ERROR, e.what(), program});
             return std::nullopt;
@@ -42,7 +51,7 @@ private:
     }
 
     bool valid_destroy(size_t offset, size_t size, const Program& program){
-        try{ buffer_.destroy_block(offset, size); }
+        try{ buffer_->destroy_block(offset, size); }
         catch(const std::out_of_range& e){
             error_log_.push_back(Error{SIZE_ERROR, e.what(), program});
             return false;
@@ -54,7 +63,7 @@ private:
         return true;
     }
 
-    bool check_exist_with_error(const std::string& name, const Program& program, const std::string& error_description) const {
+    bool check_exist_with_error(const std::string& name, const Program& program, const std::string& error_description){
         auto it = memory_elements_.find(name);
         if(it != memory_elements_.end()){
             error_log_.push_back(Error{MEMORY_LEAK, error_description, program});
@@ -63,11 +72,11 @@ private:
         return false;
     }
 
-    bool check_exist_with_allocate_error(const std::string& name, const Program& program) const {
+    bool check_exist_with_allocate_error(const std::string& name, const Program& program){
         return check_exist_with_error(name, program, "Invalid write. The memory for variable '" + name + "' has already been allocated");
     }
 
-    bool check_exist_with_destroy_error(const std::string& name, const Program& program) const {
+    bool check_exist_with_destroy_error(const std::string& name, const Program& program){
         return check_exist_with_error(name, program, "Invalid free. The memory for variable '" + name + "' has already been free");
     }
 
@@ -102,14 +111,17 @@ public:
         auto it = memory_elements_.find(target_name);
         if(it == memory_elements_.end())
             error_log_.push_back(Error{ACCESS_ERROR, "The variable named '" + target_name + "' does not exist", program});
-        
-        ReferenceDescriptor reference = it->second->make_reference(name, *this);
+        MemoryElement* element = dynamic_cast<MemoryElement*>(it->second.get());
+        if(!element){
+            error_log_.push_back(Error{ACCESS_ERROR, "You can't create a link to a link.", program});
+        }
+        ReferenceDescriptor reference = element->make_reference(name, *this);
     }
 
     void destroy_element(const std::string& name, const Program& program) override {
-        if(check_exist_with_destroy_error(name, program)) return nullptr;
+        if(check_exist_with_destroy_error(name, program)) return;
         auto it = memory_elements_.find(name);
-        if(!valid_destroy(it->second->get_offset(), it->second->get_size(), Program& program)) return;
+        if(!valid_destroy(it->second->get_offset(), it->second->get_size(), program)) return;
         memory_elements_.erase(name);
     }
 
