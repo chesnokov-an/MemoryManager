@@ -3,24 +3,25 @@
 
 #include <string>
 #include <memory>
-#include <Memory/VariableDescriptor.hpp>
+#include <Memory/MemoryElement.hpp>
 
 namespace MemoryNameSpace{
 
 class ReferenceDescriptor final : public IMemoryElement{
-public:
-    using Pointer = IMemoryElement*;
-
 private:
     std::string name_;
-    Pointer pointer_;
+    std::string target_name_;
+    IManager& manager_;
+
+private:
+    IMemoryElement* get_element() const;
 
 public:
-    ReferenceDescriptor(const std::string& name, Pointer pointer)
-            : name_(name), pointer_(pointer) {};
+    ReferenceDescriptor(const std::string& name, const std::string& target_name, IManager& manager)
+            : name_(name), target_name_(target_name), manager_(manager) {};
     const std::string& get_name() const noexcept override;
     size_t get_size() const noexcept override;
-    bool is_valid() const noexcept override;
+    bool is_valid() const noexcept;
     void get_value(IBuffer* buffer, const std::byte* value) const override;
     void set_value(IBuffer* buffer, const std::byte* value) override;
     const std::string& get_ref_name() const noexcept;

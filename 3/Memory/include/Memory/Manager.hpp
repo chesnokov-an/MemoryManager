@@ -17,6 +17,7 @@ public:
     virtual ArrayDescriptor* allocate_array(const std::string& name, size_t size, size_t element_size, const Program& program) = 0;
     virtual SharedSegmentDescriptor* allocate_shared_segment(const std::string& name, size_t size, size_t element_size, const Program& program) = 0;
     virtual ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name, const Program& program) = 0;
+    virtual IMemoryElement* get_element(const std::string& target_name) const = 0;
 };
 
 template <typename capacity_>
@@ -124,6 +125,12 @@ public:
             ReferenceDescriptor reference = it->second->make_reference(name);
         
         error_log_.push_back(Error{ACCESS_ERROR, program});
+    }
+
+    IMemoryElement* get_element(const std::string& target_name) const {
+        auto it = memory_elements_.find(target_name);
+        if(it == memory_elements_.end()) return nullptr;
+        return it->second.get();
     }
 };
 

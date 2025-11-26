@@ -2,24 +2,28 @@
 
 namespace MemoryNameSpace{
 
+IMemoryElement* ReferenceDescriptor::get_element() const {
+    return manager_.get_element(target_name_);
+}
+
 const std::string& ReferenceDescriptor::get_name() const noexcept {
-    return pointer_->get_name();
+    return get_element()->get_name();
 }
 
 size_t ReferenceDescriptor::get_size() const noexcept {
-    return pointer_->get_size();
+    return get_element()->get_size();
 }
 
 bool ReferenceDescriptor::is_valid() const noexcept {
-    return pointer_->is_valid();
+    return (get_element() != nullptr);
 }
 
 void ReferenceDescriptor::get_value(IBuffer* buffer, const std::byte* value) const {
-    pointer_->get_value(buffer, value);
+    get_element()->get_value(buffer, value);
 }
 
 void ReferenceDescriptor::set_value(IBuffer* buffer, const std::byte* value) {
-    pointer_->set_value(buffer, value);
+    get_element()->set_value(buffer, value);
 }
 
 const std::string& ReferenceDescriptor::get_ref_name() const noexcept {
