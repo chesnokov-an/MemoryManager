@@ -17,6 +17,7 @@ public:
     virtual ArrayDescriptor* allocate_array(const std::string& name, size_t size, size_t element_size, const Program& program) = 0;
     virtual SharedSegmentDescriptor* allocate_shared_segment(const std::string& name, size_t size, size_t element_size, const Program& program) = 0;
     virtual ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name, const Program& program) = 0;
+    virtual void destroy_element(const std::string& name, const Program& program) = 0;
     virtual IMemoryElement* get_element(const std::string& target_name) const = 0;
 };
 
@@ -28,39 +29,56 @@ private:
     std::vector<Error> error_log_;
     std::unordered_map<std::string, std::unique_ptr<Program>> programs_;
 
+private:
     std::optional<size_t> valid_allocate(size_t size, const Program& program){
         size_t offset = 0;
         try{
             offset = buffer_.allocate_block(size);
         }
-        catch(const std::out_of_range& e){
-            error_log_.push_back(Error{SIZE_ERROR, program});
-            return std::nullopt;
-        }
         catch(const std::runtime_error& e){
-            error_log_.push_back(Error{DOUBLE_FREE, program});
+            error_log_.push_back(Error{SIZE_ERROR, e.what(), program});
             return std::nullopt;
         }
         return offset;
+    }
+
+    bool valid_destroy(size_t offset, size_t size, const Program& program){
+        try{
+            buffer_.destroy_block(offset, size);
+        }
+        catch(const std::out_of_range& e){
+            error_log_.push_back(Error{SIZE_ERROR, e.what(), program});
+            return false;
+        }
+        catch(const std::runtime_error& e){
+            error_log_.push_back(Error{DOUBLE_FREE, e.what(), program});
+            return false;
+        }
+        return true;
+    }
+
+    bool check_exist_with_error(const std::string& name, const Program& program, const std::string& error_description) const {
+        auto it = memory_elements_.find(name);
+        if(it != memory_elements_.end()){
+            error_log_.push_back(Error{MEMORY_LEAK, error_description, program});
+            return true;
+        }
+        return false;
+    }
+
+    bool check_exist_with_allocate_error(const std::string& name, const Program& program) const {
+        return check_exist_with_error(name, program, "Invalid write. The memory for variable '" + name + "' has already been allocated");
+    }
+
+    bool check_exist_with_destroy_error(const std::string& name, const Program& program) const {
+        return check_exist_with_error(name, program, "Invalid free. The memory for variable '" + name + "' has already been free");
     }
 
 public:
     Manager() : buffer_(std::unique_ptr<IBuffer>{new Buffer<capacity_>{}}) {};
 
     VariableDescriptor* allocate_variable(const std::string& name, size_t size, const Program& program) override {
-        auto it = memory_elements_.find(name);
-        if(it != memory_elements_.end()){
-            if(it->second->is_valid()){
-                error_log_.push_back(Error{MEMORY_LEAK, program});
-                return nullptr;
-            }
-            if(auto offset = valid_allocate(size, program); offset.has_value()){
-                it->second->size = size;
-                it->second->offset = *offset;
-                return it->second.get();
-            }
-            return nullptr;
-        }
+        if(check_exist_with_allocate_error(name, program)) return nullptr;
         if(auto offset = valid_allocate(size, program); offset.has_value()){
             VariableDescriptor* variable = new VariableDescriptor{name, size, *offset};
             memory_elements_.insert({name, std::unique_ptr<IMemoryElement>{variable}});
@@ -70,20 +88,7 @@ public:
     }
 
     ArrayDescriptor* allocate_array(const std::string& name, size_t size, size_t element_size, const Program& program) override {
-        auto it = memory_elements_.find(name);
-        if(it != memory_elements_.end()){
-            if(it->second->is_valid()){
-                error_log_.push_back(Error{MEMORY_LEAK, program});
-                return nullptr;
-            }
-            if(auto offset = valid_allocate(size, program); offset.has_value()){
-                it->second->size = size;
-                it->second->offset = *offset;
-                it->second->element_size = element_size;
-                return it->second.get();
-            }
-            return nullptr;
-        }
+        if(check_exist_with_allocate_error(name, program)) return nullptr;
         if(auto offset = valid_allocate(size, program); offset.has_value()){
             ArrayDescriptor* array = new ArrayDescriptor{name, size, *offset, element_size};
             memory_elements_.insert({name, std::unique_ptr<IMemoryElement>{array}});
@@ -93,24 +98,7 @@ public:
     }
 
     SharedSegmentDescriptor* allocate_shared_segment(const std::string& name, size_t size, size_t element_size, const Program& program) override {
-        auto it = memory_elements_.find(name);
-        if(it != memory_elements_.end()){
-            if(!it->second->check_access(program.get_name())){
-                error_log_.push_back(Error{ACCESS_ERROR, program});
-                return nullptr;
-            }
-            if(it->second->is_valid()){
-                error_log_.push_back(Error{MEMORY_LEAK, program});
-                return nullptr;
-            }
-            if(auto offset = valid_allocate(size, program); offset.has_value()){
-                it->second->size = size;
-                it->second->offset = *offset;
-                it->second->element_size = element_size;
-                return it->second.get();
-            }
-            return nullptr;
-        }
+        if(check_exist_with_allocate_error(name, program)) return nullptr;
         if(auto offset = valid_allocate(size, program); offset.has_value()){
             SharedSegmentDescriptor* shared_segment = new SharedSegmentDescriptor{name, size, *offset, element_size, program};
             memory_elements_.insert({name, std::unique_ptr<IMemoryElement>{shared_segment}});
@@ -120,14 +108,22 @@ public:
     }
 
     ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name, const Program& program) override {
+        if(check_exist_with_allocate_error(name, program)) return nullptr;
         auto it = memory_elements_.find(target_name);
-        if(it != memory_elements_.end())
-            ReferenceDescriptor reference = it->second->make_reference(name);
+        if(it == memory_elements_.end())
+            error_log_.push_back(Error{ACCESS_ERROR, "The variable named '" + target_name + "' does not exist", program});
         
-        error_log_.push_back(Error{ACCESS_ERROR, program});
+        ReferenceDescriptor reference = it->second->make_reference(name, *this);
     }
 
-    IMemoryElement* get_element(const std::string& target_name) const {
+    void destroy_element(const std::string& name, const Program& program) override {
+        if(check_exist_with_destroy_error(name, program)) return nullptr;
+        auto it = memory_elements_.find(name);
+        if(!valid_destroy(it->second->get_offset(), it->second->get_size(), Program& program)) return;
+        memory_elements_.erase(name);
+    }
+
+    IMemoryElement* get_element(const std::string& target_name) const override {
         auto it = memory_elements_.find(target_name);
         if(it == memory_elements_.end()) return nullptr;
         return it->second.get();

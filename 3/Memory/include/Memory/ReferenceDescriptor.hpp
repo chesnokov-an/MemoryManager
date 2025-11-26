@@ -21,6 +21,7 @@ public:
             : name_(name), target_name_(target_name), manager_(manager) {};
     const std::string& get_name() const noexcept override;
     size_t get_size() const noexcept override;
+    size_t get_offset() const noexcept override;
     bool is_valid() const noexcept;
     void get_value(IBuffer* buffer, const std::byte* value) const override;
     void set_value(IBuffer* buffer, const std::byte* value) override;
