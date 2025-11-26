@@ -19,6 +19,7 @@ public:
     virtual ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name, const Program& program) = 0;
     virtual void destroy_element(const std::string& name, const Program& program) = 0;
     virtual IMemoryElement* get_element(const std::string& target_name) const = 0;
+    virtual void record_error(size_t type, std::string description, const Program& program) = 0;
 };
 
 template <typename capacity_>
@@ -32,9 +33,7 @@ private:
 private:
     std::optional<size_t> valid_allocate(size_t size, const Program& program){
         size_t offset = 0;
-        try{
-            offset = buffer_.allocate_block(size);
-        }
+        try{ offset = buffer_.allocate_block(size); }
         catch(const std::runtime_error& e){
             error_log_.push_back(Error{SIZE_ERROR, e.what(), program});
             return std::nullopt;
@@ -43,9 +42,7 @@ private:
     }
 
     bool valid_destroy(size_t offset, size_t size, const Program& program){
-        try{
-            buffer_.destroy_block(offset, size);
-        }
+        try{ buffer_.destroy_block(offset, size); }
         catch(const std::out_of_range& e){
             error_log_.push_back(Error{SIZE_ERROR, e.what(), program});
             return false;
@@ -77,34 +74,27 @@ private:
 public:
     Manager() : buffer_(std::unique_ptr<IBuffer>{new Buffer<capacity_>{}}) {};
 
-    VariableDescriptor* allocate_variable(const std::string& name, size_t size, const Program& program) override {
+    template <typename Descriptor, typename... ExtraArgs>
+    Descriptor* allocate_element(const std::string& name, size_t size, const Program& program, ExtraArgs&&... args){
         if(check_exist_with_allocate_error(name, program)) return nullptr;
         if(auto offset = valid_allocate(size, program); offset.has_value()){
-            VariableDescriptor* variable = new VariableDescriptor{name, size, *offset};
-            memory_elements_.insert({name, std::unique_ptr<IMemoryElement>{variable}});
-            return variable;
+            Descriptor* element = new Descriptor{name, size, *offset, args...};
+            memory_elements_.insert({name, std::unique_ptr<IMemoryElement>{element}});
+            return element;
         }
-        return nullptr;
+        return nullptr; 
+    }
+
+    VariableDescriptor* allocate_variable(const std::string& name, size_t size, const Program& program) override {
+        return allocate_element<VariableDescriptor>(name, size, program);
     }
 
     ArrayDescriptor* allocate_array(const std::string& name, size_t size, size_t element_size, const Program& program) override {
-        if(check_exist_with_allocate_error(name, program)) return nullptr;
-        if(auto offset = valid_allocate(size, program); offset.has_value()){
-            ArrayDescriptor* array = new ArrayDescriptor{name, size, *offset, element_size};
-            memory_elements_.insert({name, std::unique_ptr<IMemoryElement>{array}});
-            return array;
-        }
-        return nullptr;
+        return allocate_element<ArrayDescriptor>(name, size, program, element_size);
     }
 
     SharedSegmentDescriptor* allocate_shared_segment(const std::string& name, size_t size, size_t element_size, const Program& program) override {
-        if(check_exist_with_allocate_error(name, program)) return nullptr;
-        if(auto offset = valid_allocate(size, program); offset.has_value()){
-            SharedSegmentDescriptor* shared_segment = new SharedSegmentDescriptor{name, size, *offset, element_size, program};
-            memory_elements_.insert({name, std::unique_ptr<IMemoryElement>{shared_segment}});
-            return shared_segment;
-        }
-        return nullptr;
+        return allocate_element<SharedSegmentDescriptor>(name, size, program, element_size, program);
     }
 
     ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name, const Program& program) override {
@@ -127,6 +117,10 @@ public:
         auto it = memory_elements_.find(target_name);
         if(it == memory_elements_.end()) return nullptr;
         return it->second.get();
+    }
+
+    void record_error(size_t type, std::string description, const Program& program){
+        error_log_.push_back(Error{type, description, program});
     }
 };
 

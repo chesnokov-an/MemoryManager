@@ -20,7 +20,7 @@ private:
     const Program& program_;
 
 public:
-    Error(int type, std::string description, const Program& program)
+    Error(size_t type, std::string description, const Program& program)
             : type_(static_cast<error_t>(type)), description_(description), program_(program) {}
     std::string get_description();
 };
