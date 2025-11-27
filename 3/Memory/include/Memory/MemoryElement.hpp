@@ -17,15 +17,14 @@ protected:
 
 public:
     MemoryElement(const std::string& name, size_t size, size_t offset)
-            : name_(name), size_(size), offset_(offset) {};
+            : name_(name), size_(size), offset_(offset) {}
     const std::string& get_name() const noexcept override;
     size_t get_size() const noexcept override;
     size_t get_offset() const noexcept override;
     void get_value(IBuffer* buffer, std::byte* value) const override;
     void set_value(IBuffer* buffer, const std::byte* value) override;
     virtual ReferenceDescriptor make_reference(std::string name, IManager& manager);
-    virtual void make_abstract() const noexcept = 0;
-    virtual ~MemoryElement(){};
+    virtual ~MemoryElement() = 0;
 };
 
 }

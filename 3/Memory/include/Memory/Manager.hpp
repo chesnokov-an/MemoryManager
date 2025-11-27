@@ -103,7 +103,7 @@ public:
     }
 
     SharedSegmentDescriptor* allocate_shared_segment(const std::string& name, size_t size, size_t element_size, const Program& program) override {
-        return allocate_element<SharedSegmentDescriptor>(name, size, program, element_size, program);
+        return allocate_element<SharedSegmentDescriptor>(name, size, program, element_size, &program);
     }
 
     ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name, const Program& program) override {
@@ -115,7 +115,9 @@ public:
         if(!element){
             error_log_.push_back(Error{ACCESS_ERROR, "You can't create a link to a link.", program});
         }
-        ReferenceDescriptor reference = element->make_reference(name, *this);
+        ReferenceDescriptor* reference = new ReferenceDescriptor{element->make_reference(name, *this)};
+        memory_elements_.insert({name, std::unique_ptr<IMemoryElement>{reference}});
+        return reference;
     }
 
     void destroy_element(const std::string& name, const Program& program) override {

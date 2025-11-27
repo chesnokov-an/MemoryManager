@@ -2,6 +2,8 @@
 
 namespace MemoryNameSpace{
 
+MemoryElement::~MemoryElement() {}
+
 const std::string& MemoryElement::get_name() const noexcept { return name_; }
 
 size_t MemoryElement::get_size() const noexcept { return size_; }

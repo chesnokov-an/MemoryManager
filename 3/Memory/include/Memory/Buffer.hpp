@@ -10,7 +10,7 @@
 
 namespace MemoryNameSpace{
 
-class IBuffer final{
+class IBuffer{
 public:
     virtual std::byte* get_data() noexcept = 0;
     virtual const std::byte* get_data() const noexcept = 0;
@@ -39,7 +39,7 @@ public:
     std::byte* get_data() noexcept override { return buffer_.data(); }
     const std::byte* get_data() const noexcept override { return buffer_.data(); }
     size_t get_size() const noexcept override { return size_; }
-    consteval size_t get_capacity() const noexcept override { return capacity_; }
+    constexpr size_t get_capacity() const noexcept override { return capacity_; }
     
     size_t allocate_block(size_t size) override {
         size_t offset_res = 0;

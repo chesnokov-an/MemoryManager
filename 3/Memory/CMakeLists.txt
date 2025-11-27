@@ -34,6 +34,8 @@ project(Memory)
 # C++ standard
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -g")
 
 # 🔹 Собираем все .cpp из source/
 file(GLOB MEMORY_SOURCES
@@ -46,7 +48,7 @@ add_library(Memory STATIC ${MEMORY_SOURCES})
 # 🔹 Подключаем include/ как публичную директорию
 target_include_directories(Memory PUBLIC include)
 
-# (Опционально) включить более строгие предупреждения
-target_compile_options(Memory PRIVATE
-    -Wall -Wextra -Wpedantic
-)
+# # (Опционально) включить более строгие предупреждения
+# target_compile_options(Memory PRIVATE
+#     -Wall -Wextra -Wpedantic
+# )

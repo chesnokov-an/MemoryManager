@@ -1,7 +1,6 @@
 #include <Memory/ReferenceDescriptor.hpp>
-#include <Memory/MemoryElement.hpp>
-#include <Memory/Manager.hpp>
 #include <Memory/Buffer.hpp>
+#include <Memory/Manager.hpp>
 
 namespace MemoryNameSpace{
 
@@ -25,7 +24,7 @@ bool ReferenceDescriptor::is_valid() const noexcept {
     return (get_element() != nullptr);
 }
 
-void ReferenceDescriptor::get_value(IBuffer* buffer, const std::byte* value) const {
+void ReferenceDescriptor::get_value(IBuffer* buffer, std::byte* value) const {
     get_element()->get_value(buffer, value);
 }
 

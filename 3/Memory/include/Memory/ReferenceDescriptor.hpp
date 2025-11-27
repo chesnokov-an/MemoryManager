@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <Memory/IMemoryElement.hpp>
 
 namespace MemoryNameSpace{
 
