@@ -18,12 +18,12 @@ public:
     virtual size_t get_capacity() const noexcept = 0;
     virtual size_t allocate_block(size_t size) = 0;
     virtual void destroy_block(size_t offset, size_t size) = 0;
-    virtual ~IBuffer(){}
+    virtual ~IBuffer() = default;
 };
 
 struct Block{
-    size_t offset;
-    size_t size;
+    size_t offset = 0;
+    size_t size = 0;
 };
 
 template<size_t capacity_>
@@ -34,7 +34,8 @@ private:
     std::vector<Block> blocks_;
 
 public:
-    Buffer() : buffer_(), size_(0), blocks_(std::vector<Block>{{0, capacity_}}) {};
+    Buffer() : IBuffer(), size_(0), blocks_(std::vector<Block>{{0, capacity_}}) {};
+    ~Buffer() override = default;
     
     std::byte* get_data() noexcept override { return buffer_.data(); }
     const std::byte* get_data() const noexcept override { return buffer_.data(); }

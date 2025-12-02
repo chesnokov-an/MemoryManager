@@ -11,8 +11,8 @@ protected:
     size_t element_size_;
 
 public:
-    ArrayDescriptor(const std::string& name, size_t size, size_t offset, size_t element_size)
-            : MemoryElement(name, size, offset), element_size_(element_size) {}
+    ArrayDescriptor(const std::string& name, size_t size, size_t offset, size_t element_size, IManager& manager)
+            : MemoryElement(name, size, offset, manager), element_size_(element_size) {}
     using MemoryElement::get_value;
     void get_value(IBuffer* buffer, size_t index, std::byte* value) const;
     void get_value(IBuffer* buffer, size_t begin, size_t end, std::byte* value) const;

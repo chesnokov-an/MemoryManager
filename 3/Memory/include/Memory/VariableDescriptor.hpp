@@ -9,8 +9,8 @@ namespace MemoryNameSpace{
 
 class VariableDescriptor final : public MemoryElement{
 public:
-    VariableDescriptor(const std::string& name, size_t size, size_t offset)
-            : MemoryElement(name, size, offset) {};
+    VariableDescriptor(const std::string& name, size_t size, size_t offset, IManager& manager)
+            : MemoryElement(name, size, offset, manager) {};
 };
 
 }

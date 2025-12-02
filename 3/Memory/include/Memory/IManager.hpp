@@ -33,12 +33,15 @@ public:
     virtual IMemoryElement* get_element(const std::string& target_name) const = 0;
     virtual void record_error(size_t type, std::string description, const Program& program) = 0;
     virtual Program* add_program(const std::string& name, const std::string& file_path, size_t memory_limit) = 0;
+    virtual std::byte* get_data() noexcept = 0;
+    virtual const std::byte* get_data() const noexcept = 0;
+    virtual ~IManager(){}
 
     template <memory_element_t Descriptor, typename... ExtraArgs>
     Descriptor* allocate_element(const std::string& name, size_t size, const Program& program, ExtraArgs&&... args){
         if(check_exist_with_allocate_error(name, program)) return nullptr;
         if(auto offset = valid_allocate(size, program); offset.has_value()){
-            Descriptor* element = new Descriptor{name, size, *offset, args...};
+            Descriptor* element = new Descriptor{name, size, *offset, args..., *this};
             insert_element(element);
             return element;
         }

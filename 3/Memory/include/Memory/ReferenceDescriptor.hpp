@@ -27,8 +27,8 @@ public:
     size_t get_size() const noexcept override;
     size_t get_offset() const noexcept override;
     bool is_valid() const noexcept;
-    void get_value(IBuffer* buffer, std::byte* value) const override;
-    void set_value(IBuffer* buffer, const std::byte* value) override;
+    void get_raw_value(std::byte* value) const override;
+    void set_raw_value(const std::byte* value) override;
     const std::string& get_ref_name() const noexcept;
 };
 

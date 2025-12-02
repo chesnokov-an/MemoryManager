@@ -60,10 +60,10 @@ private:
     }
 
 public:
-    Manager() : buffer_(std::unique_ptr<IBuffer>{new Buffer<capacity_>{}}) {};
+    Manager() : IManager(), buffer_(std::unique_ptr<IBuffer>{new Buffer<capacity_>{}}) {};
 
     void insert_element(IMemoryElement* element) override {
-        memory_elements_.insert({element->get_name(), std::unique_ptr<IMemoryElement>{element}});
+        memory_elements_.emplace(element->get_name(), std::unique_ptr<IMemoryElement>(element));
     }
 
     void erase_element(IMemoryElement* element) override {
@@ -73,14 +73,17 @@ public:
     ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name, const Program& program) override {
         if(check_exist_with_allocate_error(name, program)) return nullptr;
         auto it = memory_elements_.find(target_name);
-        if(it == memory_elements_.end())
+        if(it == memory_elements_.end()){
             error_log_.push_back(Error{ACCESS_ERROR, "The variable named '" + target_name + "' does not exist", program});
+            return nullptr;
+        }
         MemoryElement* element = dynamic_cast<MemoryElement*>(it->second.get());
         if(!element){
             error_log_.push_back(Error{ACCESS_ERROR, "You can't create a link to a link.", program});
+            return nullptr;
         }
         ReferenceDescriptor* reference = new ReferenceDescriptor{element->make_reference(name, *this)};
-        memory_elements_.insert({name, std::unique_ptr<IMemoryElement>{reference}});
+        memory_elements_.emplace(name, std::unique_ptr<IMemoryElement>(reference));
         return reference;
     }
 
@@ -107,9 +110,16 @@ public:
             error_log_.push_back(Error{ACCESS_ERROR, "The program has already been created.", *(it->second.get())});
             return nullptr;
         }
-        Program* program = new Program{name, file_path, memory_limit, *this};
-        programs_.insert({name, std::unique_ptr<Program>{program}});
-        return program;
+        auto program = std::make_unique<Program>(name, file_path, memory_limit, *this);
+        Program* program_ptr = program.get();
+        programs_.insert({name, std::move(program)});
+        return program_ptr;
+    }
+    std::byte* get_data() noexcept {
+        return buffer_->get_data();
+    }
+    const std::byte* get_data() const noexcept {
+        return buffer_->get_data();
     }
 };
 
