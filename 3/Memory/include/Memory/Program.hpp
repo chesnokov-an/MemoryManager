@@ -4,11 +4,11 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <Memory/IManager.hpp>
 
 namespace MemoryNameSpace{
 
 class IMemoryElement;  // forward
-class IManager;  // forward
 
 class Program final{
 private:
@@ -19,19 +19,25 @@ private:
     std::unordered_map<std::string, IMemoryElement*> memory_elements_;
     IManager& manager_;
 
-private:
-    template <typename Alloc, typename... ExtraArgs>
-    bool allocate_element(const std::string& name, size_t size, Alloc&& allocator, ExtraArgs&&... args);
-
 public:
     Program(std::string name, std::string file_path, size_t memory_limit, IManager& manager)
             : name_(name), file_path_(file_path), memory_limit_(memory_limit), used_memory_(0), memory_elements_(), manager_(manager) {}
     
     const std::string& get_name() const;
-    bool allocate_variable(const std::string& name, size_t size);
-    bool allocate_array(const std::string& name, size_t size, size_t element_size);
-    bool allocate_shared_segment(const std::string& name, size_t size, size_t element_size);
-    bool make_reference(const std::string& name, const std::string& target_name);
+    ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name);
+
+    template <memory_element_t Descriptor, typename... ExtraArgs>
+    Descriptor* allocate_element(const std::string& name, size_t size, ExtraArgs&&... args){
+        if(size > memory_limit_ - used_memory_){
+            manager_.record_error(SIZE_ERROR, "Еhe memory limit in the '" + name_ + "' program has been exceeded", *this);
+            return nullptr;
+        }
+        Descriptor* element = manager_.allocate_element<Descriptor>(name, size, args..., *this);
+        if(element == nullptr) return nullptr;
+        memory_elements_.insert({name, element});
+        used_memory_ += size;
+        return element;
+    }
 };
 
 }
