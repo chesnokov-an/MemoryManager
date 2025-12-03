@@ -32,7 +32,7 @@ public:
             manager_.record_error(SIZE_ERROR, "Еhe memory limit in the '" + name_ + "' program has been exceeded", *this);
             return nullptr;
         }
-        Descriptor* element = manager_.allocate_element<Descriptor>(name, size, args..., *this);
+        Descriptor* element = manager_.allocate_element<Descriptor>(name, size, *this, args...);
         if(element == nullptr) return nullptr;
         memory_elements_.insert({name, element});
         used_memory_ += size;

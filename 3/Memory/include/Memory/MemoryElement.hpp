@@ -21,9 +21,10 @@ public:
             : name_(name), size_(size), offset_(offset), manager_(manager) {}
     const std::string& get_name() const noexcept override;
     size_t get_size() const noexcept override;
+    size_t get_elem_size() const noexcept override;
     size_t get_offset() const noexcept override;
-    void get_raw_value(std::byte* value) const override;
-    void set_raw_value(const std::byte* value) override;
+    void get_raw_value(std::byte* value, size_t, size_t) const override;
+    void set_raw_value(const std::byte* value, size_t , size_t) override;
     virtual ReferenceDescriptor make_reference(std::string name, IManager& manager);
     virtual ~MemoryElement() = 0;
 };

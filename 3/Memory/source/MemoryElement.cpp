@@ -8,14 +8,16 @@ const std::string& MemoryElement::get_name() const noexcept { return name_; }
 
 size_t MemoryElement::get_size() const noexcept { return size_; }
 
+size_t MemoryElement::get_elem_size() const noexcept { return size_; }
+
 size_t MemoryElement::get_offset() const noexcept { return offset_; }
 
-void MemoryElement::get_raw_value(std::byte* value) const {
+void MemoryElement::get_raw_value(std::byte* value, size_t, size_t) const {
     std::byte* target = manager_.get_data() + offset_;
     std::copy(target, target + size_, value);
 }
 
-void MemoryElement::set_raw_value(const std::byte* value){
+void MemoryElement::set_raw_value(const std::byte* value, size_t, size_t){
     std::byte* target = manager_.get_data() + offset_;
     std::copy(value, value + size_, target);
 }
