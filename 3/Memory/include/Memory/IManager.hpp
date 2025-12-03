@@ -35,6 +35,7 @@ public:
     virtual Program* add_program(const std::string& name, const std::string& file_path, size_t memory_limit) = 0;
     virtual std::byte* get_data() noexcept = 0;
     virtual const std::byte* get_data() const noexcept = 0;
+    virtual void show_errors() const = 0;
     virtual ~IManager(){}
 
     template <memory_element_t Descriptor, typename... ExtraArgs>

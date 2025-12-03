@@ -22,8 +22,8 @@ void MemoryElement::set_raw_value(const std::byte* value, size_t, size_t){
     std::copy(value, value + size_, target);
 }
 
-ReferenceDescriptor MemoryElement::make_reference(std::string name, IManager& manager) {
-    return ReferenceDescriptor{name, name_, manager};
+ReferenceDescriptor MemoryElement::make_reference(std::string name) {
+    return ReferenceDescriptor{name, name_, manager_};
 }
 
 }

@@ -7,6 +7,7 @@
 #include <optional>
 #include <Memory/IManager.hpp>
 #include <Memory/MemoryElement.hpp>
+#include <iostream>
 
 namespace MemoryNameSpace{
 
@@ -82,7 +83,7 @@ public:
             error_log_.push_back(Error{ACCESS_ERROR, "You can't create a link to a link.", program});
             return nullptr;
         }
-        ReferenceDescriptor* reference = new ReferenceDescriptor{element->make_reference(name, *this)};
+        ReferenceDescriptor* reference = new ReferenceDescriptor{element->make_reference(name)};
         memory_elements_.emplace(name, std::unique_ptr<IMemoryElement>(reference));
         return reference;
     }
@@ -120,6 +121,12 @@ public:
     }
     const std::byte* get_data() const noexcept {
         return buffer_->get_data();
+    }
+
+    void show_errors() const override {
+        for(auto error : error_log_){
+            std::cout << error.get_description() << std::endl;
+        }
     }
 };
 

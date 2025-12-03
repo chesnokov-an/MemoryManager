@@ -28,12 +28,12 @@ bool ReferenceDescriptor::is_valid() const noexcept {
     return (get_element() != nullptr);
 }
 
-void ReferenceDescriptor::get_raw_value(std::byte* value, size_t, size_t) const {
-    get_element()->get_raw_value(value);
+void ReferenceDescriptor::get_raw_value(std::byte* value, size_t begin, size_t end) const {
+    get_element()->get_raw_value(value, begin, end);
 }
 
-void ReferenceDescriptor::set_raw_value(const std::byte* value, size_t, size_t) {
-    get_element()->set_raw_value(value);
+void ReferenceDescriptor::set_raw_value(const std::byte* value, size_t begin, size_t end) {
+    get_element()->set_raw_value(value, begin, end);
 }
 
 const std::string& ReferenceDescriptor::get_ref_name() const noexcept {

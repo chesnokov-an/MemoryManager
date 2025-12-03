@@ -25,7 +25,7 @@ public:
     size_t get_offset() const noexcept override;
     void get_raw_value(std::byte* value, size_t, size_t) const override;
     void set_raw_value(const std::byte* value, size_t , size_t) override;
-    virtual ReferenceDescriptor make_reference(std::string name, IManager& manager);
+    virtual ReferenceDescriptor make_reference(std::string name);
     virtual ~MemoryElement() = 0;
 };
 
