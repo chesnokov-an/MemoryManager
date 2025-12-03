@@ -14,7 +14,7 @@ private:
     std::unordered_map<std::string, const Program*> programs_;
 
 public:
-    SharedSegmentDescriptor(const std::string& name, size_t size, size_t element_size, size_t offset, const Program* program, IManager& manager)
+    SharedSegmentDescriptor(const std::string& name, size_t size, size_t offset, size_t element_size, const Program* program, IManager& manager)
             : ArrayDescriptor(name, size, offset, element_size, manager)
             , programs_(std::unordered_map<std::string, const Program*>{{program->get_name(), program}}) {};
     void insert_program(const Program* program);
