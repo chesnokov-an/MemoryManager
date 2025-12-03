@@ -42,7 +42,7 @@ public:
     Descriptor* allocate_element(const std::string& name, size_t size, const Program& program, ExtraArgs&&... args){
         if(check_exist_with_allocate_error(name, program)) return nullptr;
         if(auto offset = valid_allocate(size, program); offset.has_value()){
-            Descriptor* element = new Descriptor{name, size, *offset, args..., *this};
+            Descriptor* element = new Descriptor(name, size, *offset, args..., *this);
             insert_element(element);
             return element;
         }
