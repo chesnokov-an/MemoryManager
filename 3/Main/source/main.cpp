@@ -67,9 +67,16 @@ int main(){
     dynamic_cast<SharedSegmentDescriptor*>(b)->insert_program(prog1);
     dynamic_cast<SharedSegmentDescriptor*>(b)->erase_program("VSCode");
 
-
-
-
     manager.show_errors();
+
+    /*
+    Manager manager;
+    Presenter presenter(manager);
+    View view(presenter);
+
+    presenter.set_view(&view);
+
+    view.show();
+    */
     return 0;
 }
