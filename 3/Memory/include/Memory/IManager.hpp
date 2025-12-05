@@ -21,7 +21,6 @@ class IManager {
 protected:
     virtual std::optional<size_t> valid_allocate(size_t size, const Program& program) = 0;
     virtual bool valid_destroy(size_t offset, size_t size, const Program& program) = 0;
-    virtual bool check_exist_with_error(const std::string& name, const Program& program, const std::string& error_description) = 0;
     virtual bool check_exist_with_allocate_error(const std::string& name, const Program& program) = 0;
     virtual bool check_exist_with_destroy_error(const std::string& name, const Program& program) = 0;
     
@@ -29,10 +28,14 @@ public:
     virtual void insert_element(IMemoryElement* element) = 0;
     virtual void erase_element(IMemoryElement* element) = 0;
     virtual ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name, const Program& program) = 0;
-    virtual void destroy_element(const std::string& name, const Program& program) = 0;
+    virtual bool destroy_element(const std::string& name, const Program& program) = 0;
     virtual IMemoryElement* get_element(const std::string& target_name) const = 0;
-    virtual void record_error(size_t type, std::string description, const Program& program) = 0;
+    virtual void record_error(size_t type, const std::string& description, const Program& program) = 0;
     virtual Program* add_program(const std::string& name, const std::string& file_path, size_t memory_limit) = 0;
+    
+    virtual bool get_access_to_shared(const std::string& prog_name, const std::string& segment_name) = 0;
+    virtual bool revoke_access_to_shared(const std::string& prog_name, const std::string& segment_name) = 0;
+
     virtual std::byte* get_data() noexcept = 0;
     virtual const std::byte* get_data() const noexcept = 0;
     virtual void show_errors() const = 0;

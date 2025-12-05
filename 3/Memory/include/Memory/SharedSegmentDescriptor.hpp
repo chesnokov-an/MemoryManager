@@ -18,8 +18,9 @@ public:
             : ArrayDescriptor(name, size, offset, element_size, manager)
             , programs_(std::unordered_map<std::string, const Program*>{{program->get_name(), program}}) {};
     void insert_program(const Program* program);
-    void erase_program(const std::string& name);
+    void erase_program(const Program* program);
     bool check_access(const std::string& name) const;
+    bool is_last() const;
 };
 
 }

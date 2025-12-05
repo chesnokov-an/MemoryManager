@@ -7,6 +7,7 @@
 #include <optional>
 #include <Memory/IManager.hpp>
 #include <Memory/MemoryElement.hpp>
+#include <Memory/SharedSegmentDescriptor.hpp>
 #include <iostream>
 
 namespace MemoryNameSpace{
@@ -24,7 +25,7 @@ private:
         size_t offset = 0;
         try{ offset = buffer_->allocate_block(size); }
         catch(const std::runtime_error& e){
-            error_log_.push_back(Error{SIZE_ERROR, e.what(), program});
+            error_log_.push_back(Error{SIZE_ERROR, e.what(), &program});
             return std::nullopt;
         }
         return offset;
@@ -33,31 +34,52 @@ private:
     bool valid_destroy(size_t offset, size_t size, const Program& program) override {
         try{ buffer_->destroy_block(offset, size); }
         catch(const std::out_of_range& e){
-            error_log_.push_back(Error{SIZE_ERROR, e.what(), program});
+            error_log_.push_back(Error{SIZE_ERROR, e.what(), &program});
             return false;
         }
         catch(const std::runtime_error& e){
-            error_log_.push_back(Error{DOUBLE_FREE, e.what(), program});
+            error_log_.push_back(Error{DOUBLE_FREE, e.what(), &program});
             return false;
         }
         return true;
     }
 
-    bool check_exist_with_error(const std::string& name, const Program& program, const std::string& error_description) override {
+    bool check_exist_with_allocate_error(const std::string& name, const Program& program) override {
         auto it = memory_elements_.find(name);
         if(it != memory_elements_.end()){
-            error_log_.push_back(Error{MEMORY_LEAK, error_description, program});
+            error_log_.push_back(Error{MEMORY_LEAK, "Invalid write. The memory for variable '" + name + "' has already been allocated", &program});
             return true;
         }
         return false;
     }
 
-    bool check_exist_with_allocate_error(const std::string& name, const Program& program) override {
-        return check_exist_with_error(name, program, "Invalid write. The memory for variable '" + name + "' has already been allocated");
+    bool check_exist_with_destroy_error(const std::string& name, const Program& program) override {
+        auto it = memory_elements_.find(name);
+        if(it == memory_elements_.end()){
+            error_log_.push_back(Error{MEMORY_LEAK, "Invalid free. The memory for variable '" + name + "' has already been free", &program});
+            return true;
+        }
+        return false;
     }
 
-    bool check_exist_with_destroy_error(const std::string& name, const Program& program) override {
-        return check_exist_with_error(name, program, "Invalid free. The memory for variable '" + name + "' has already been free");
+    bool is_correct_shared_with_error(const std::string& prog_name, const std::string& segment_name){
+        auto prog_it = programs_.find(prog_name);
+        if(prog_it == programs_.end()){
+            error_log_.push_back(Error{ACCESS_ERROR, "The program '" + prog_name + "' does not exist.", nullptr});
+            return false;
+        }
+        Program* prog = prog_it->second.get();
+        auto segment_it = memory_elements_.find(segment_name);
+        if(segment_it == memory_elements_.end()){
+            error_log_.push_back(Error{ACCESS_ERROR, "The variable '" + segment_name + "' does not exist", prog});
+            return false;
+        }
+        SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(segment_it->second.get());
+        if(!segment){
+            error_log_.push_back(Error{ACCESS_ERROR, "The variable '" + segment_name + "' is not shared segment", prog});
+            return false;
+        }
+        return true;
     }
 
 public:
@@ -75,12 +97,12 @@ public:
         if(check_exist_with_allocate_error(name, program)) return nullptr;
         auto it = memory_elements_.find(target_name);
         if(it == memory_elements_.end()){
-            error_log_.push_back(Error{ACCESS_ERROR, "The variable named '" + target_name + "' does not exist", program});
+            error_log_.push_back(Error{ACCESS_ERROR, "The variable named '" + target_name + "' does not exist", &program});
             return nullptr;
         }
         MemoryElement* element = dynamic_cast<MemoryElement*>(it->second.get());
         if(!element){
-            error_log_.push_back(Error{ACCESS_ERROR, "You can't create a link to a link.", program});
+            error_log_.push_back(Error{ACCESS_ERROR, "You can't create a link to a link.", &program});
             return nullptr;
         }
         ReferenceDescriptor* reference = new ReferenceDescriptor{element->make_reference(name)};
@@ -88,11 +110,12 @@ public:
         return reference;
     }
 
-    void destroy_element(const std::string& name, const Program& program) override {
-        if(check_exist_with_destroy_error(name, program)) return;
+    bool destroy_element(const std::string& name, const Program& program) override {
+        if(check_exist_with_destroy_error(name, program)) return false;
         auto it = memory_elements_.find(name);
-        if(!valid_destroy(it->second->get_offset(), it->second->get_size(), program)) return;
+        if(!valid_destroy(it->second->get_offset(), it->second->get_size(), program)) return false;
         memory_elements_.erase(name);
+        return true;
     }
 
     IMemoryElement* get_element(const std::string& target_name) const override {
@@ -101,14 +124,14 @@ public:
         return it->second.get();
     }
 
-    void record_error(size_t type, std::string description, const Program& program) override {
-        error_log_.push_back(Error{type, description, program});
+    void record_error(size_t type, const std::string& description, const Program& program) override {
+        error_log_.push_back(Error{type, description, &program});
     }
 
     Program* add_program(const std::string& name, const std::string& file_path, size_t memory_limit){
         auto it = programs_.find(name);
         if(it != programs_.end()){
-            error_log_.push_back(Error{ACCESS_ERROR, "The program has already been created.", *(it->second.get())});
+            error_log_.push_back(Error{ACCESS_ERROR, "The program has already been created.", it->second.get()});
             return nullptr;
         }
         auto program = std::make_unique<Program>(name, file_path, memory_limit, *this);
@@ -116,17 +139,48 @@ public:
         programs_.insert({name, std::move(program)});
         return program_ptr;
     }
+
+    bool get_access_to_shared(const std::string& prog_name, const std::string& segment_name) override {
+        if(is_correct_shared_with_error(prog_name, segment_name) == false) return false;
+        Program* prog = programs_.find(prog_name)->second.get();
+        SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(memory_elements_.find(segment_name)->second.get());
+        if(prog->increase_used_memory(segment->get_size()) == false) return false;
+        prog->insert_element(segment);
+        segment->insert_program(prog);
+        return true;
+    }
+    
+    bool revoke_access_to_shared(const std::string& prog_name, const std::string& segment_name) override {
+        if(is_correct_shared_with_error(prog_name, segment_name) == false) return false;
+        Program* prog = programs_.find(prog_name)->second.get();
+        SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(memory_elements_.find(segment_name)->second.get());
+        if(segment->is_last()){
+            record_error(MEMORY_LEAK, "This is the last program that owns the segment '" + segment->get_name() + "'.", *prog);
+            return false;
+        }
+        prog->erase_element(segment);
+        segment->erase_program(prog);
+        return true;
+    }
+
     std::byte* get_data() noexcept {
         return buffer_->get_data();
     }
+
     const std::byte* get_data() const noexcept {
         return buffer_->get_data();
     }
 
     void show_errors() const override {
+        std::cout << "-----------------" << std::endl;
         for(auto error : error_log_){
             std::cout << error.get_description() << std::endl;
         }
+        std::cout << "-----------------" << std::endl;
+        for(const auto &elem : memory_elements_){
+            std::cout << elem.second->get_name() << std::endl;
+        }
+        std::cout << "-----------------" << std::endl;
     }
 };
 

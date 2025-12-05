@@ -9,7 +9,7 @@ IMemoryElement* ReferenceDescriptor::get_element() const {
 }
 
 const std::string& ReferenceDescriptor::get_name() const noexcept {
-    return get_element()->get_name();
+    return name_;
 }
 
 size_t ReferenceDescriptor::get_size() const noexcept {

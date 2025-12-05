@@ -19,10 +19,10 @@ class Error final{
 private:
     error_t type_;
     std::string description_;
-    const Program& program_;
+    const Program * const program_;
 
 public:
-    Error(size_t type, std::string description, const Program& program)
+    Error(size_t type, std::string description, const Program * const program)
             : type_(static_cast<error_t>(type)), description_(description), program_(program) {}
     std::string get_description();
 };

@@ -24,7 +24,12 @@ public:
             : name_(name), file_path_(file_path), memory_limit_(memory_limit), used_memory_(0), memory_elements_(), manager_(manager) {}
     
     const std::string& get_name() const;
+    void insert_element(IMemoryElement* element);
+    void erase_element(IMemoryElement* element);
     ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name);
+    void record_error(size_t type, const std::string& description);
+    bool destroy_element(const std::string& name);
+    bool increase_used_memory(size_t value);
 
     template <memory_element_t Descriptor, typename... ExtraArgs>
     Descriptor* allocate_element(const std::string& name, size_t size, ExtraArgs&&... args){
