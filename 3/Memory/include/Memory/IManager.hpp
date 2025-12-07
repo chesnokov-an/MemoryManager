@@ -15,7 +15,9 @@ class ReferenceDescriptor;         // forward
 class IMemoryElement; 
 
 template<typename T>
-concept memory_element_t = std::is_base_of_v<IMemoryElement, T>;
+concept memory_element_t =
+    std::is_base_of_v<IMemoryElement, T> &&
+    !std::is_same_v<IMemoryElement, T>;
 
 class IManager {
 protected:
@@ -39,6 +41,7 @@ public:
     virtual std::byte* get_data() noexcept = 0;
     virtual const std::byte* get_data() const noexcept = 0;
     virtual void show_errors() const = 0;
+    virtual std::unordered_map<std::string, IMemoryElement*> get_memory_elements() const = 0;
     virtual ~IManager(){}
 
     template <memory_element_t Descriptor, typename... ExtraArgs>

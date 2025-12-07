@@ -144,7 +144,7 @@ public:
         if(is_correct_shared_with_error(prog_name, segment_name) == false) return false;
         Program* prog = programs_.find(prog_name)->second.get();
         SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(memory_elements_.find(segment_name)->second.get());
-        if(prog->increase_used_memory(segment->get_size()) == false) return false;
+        if(prog->possible_for_expansion(segment->get_size()) == false) return false;
         prog->insert_element(segment);
         segment->insert_program(prog);
         return true;
@@ -181,6 +181,14 @@ public:
             std::cout << elem.second->get_name() << std::endl;
         }
         std::cout << "-----------------" << std::endl;
+    }
+
+    std::unordered_map<std::string, IMemoryElement*> get_memory_elements() const {
+        std::unordered_map<std::string, IMemoryElement*> result;
+        result.reserve(memory_elements_.size());
+        for (auto& [name, ptr] : memory_elements_)
+            result.emplace(name, ptr.get());
+        return result;
     }
 };
 

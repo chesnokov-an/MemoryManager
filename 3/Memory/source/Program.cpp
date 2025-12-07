@@ -31,15 +31,6 @@ void Program::record_error(size_t type, const std::string& description){
     manager_.record_error(type, description, *this);
 }
 
-bool Program::increase_used_memory(size_t size){
-    if(size > memory_limit_ - used_memory_){
-        manager_.record_error(SIZE_ERROR, "Еhe memory limit in the '" + name_ + "' program has been exceeded", *this);
-        return false;
-    }
-    used_memory_ += size;
-    return true;
-}
-
 bool Program::destroy_element(const std::string& name){
     auto it = memory_elements_.find(name);
     if(it == memory_elements_.end()){
@@ -51,14 +42,29 @@ bool Program::destroy_element(const std::string& name){
         record_error(MEMORY_LEAK, "The segment '" + segment->get_name() + "' is is still used by others programs.");
         return false;
     }
-    size_t size = it->second->get_size();
     erase_element(it->second);
     if(manager_.destroy_element(name, *this) == false){
         insert_element(it->second);
         return false;
     }
-    used_memory_ -= size;
     return true;
+}
+
+bool Program::possible_for_expansion(size_t size) const {
+    if(size > memory_limit_ - get_used_memory())
+        return false;
+    return true;
+}
+
+size_t Program::get_used_memory() const {
+    size_t res = 0;
+    for(auto&& elem : memory_elements_)
+        res += elem.second->get_size();
+    return res;
+}
+
+const std::unordered_map<std::string, IMemoryElement*>& Program::get_memory_elements() const noexcept {
+    return memory_elements_;
 }
 
 }
