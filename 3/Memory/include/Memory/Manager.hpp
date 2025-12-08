@@ -171,17 +171,41 @@ public:
         return buffer_->get_data();
     }
 
-    void show_errors() const override {
-        std::cout << "-----------------" << std::endl;
-        for(auto error : error_log_){
-            std::cout << error.get_description() << std::endl;
-        }
-        std::cout << "-----------------" << std::endl;
-        for(const auto &elem : memory_elements_){
-            std::cout << elem.second->get_name() << std::endl;
-        }
-        std::cout << "-----------------" << std::endl;
+    constexpr size_t get_capacity() const noexcept {
+        return capacity_;
     }
+
+    std::vector<Error> all_errors() const override {
+        return error_log_;
+    }
+
+    std::vector<Error> program_errors(const Program& program) const override {
+        std::vector<Error> errors;
+        for(auto&& error : error_log_){
+            if(&error.get_program() == &program)
+                errors.push_back(error);
+        }
+        return errors;
+    }
+
+    std::vector<ReferenceDescriptor*> dungling_reference() const override {
+        std::vector<ReferenceDescriptor*> dungling_refs;
+        for(auto&& [name, ptr] : memory_elements_){
+            ReferenceDescriptor* ref = dynamic_cast<ReferenceDescriptor*>(ptr.get());
+            if(ref && (ref->is_valid() == false))
+                dungling_refs.push_back(ref);
+        }
+        return dungling_refs;
+    }
+
+    std::unordered_map<std::string, double> statistics() const override {
+        std::unordered_map<std::string, double> table;
+        for(auto&& [name, ptr] : programs_){
+            table.insert({name, static_cast<double>(ptr->get_used_memory()) / static_cast<double>(capacity_)});
+        }
+        return table;
+    }
+
 
     std::unordered_map<std::string, IMemoryElement*> get_memory_elements() const {
         std::unordered_map<std::string, IMemoryElement*> result;

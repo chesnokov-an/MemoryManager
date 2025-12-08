@@ -24,7 +24,8 @@ private:
 public:
     Error(size_t type, std::string description, const Program * const program)
             : type_(static_cast<error_t>(type)), description_(description), program_(program) {}
-    std::string get_description();
+    std::string get_description() const;
+    const Program& get_program() const;
 };
 
 }

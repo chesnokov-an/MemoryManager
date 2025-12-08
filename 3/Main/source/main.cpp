@@ -53,9 +53,9 @@ int main(){
     // b->get_value(value, 0, 4);
     std::cout << value.a << value.b << value.c << value.d << std::endl;
 
-    IMemoryElement* ref = prog->make_reference("c", "A");
+    IMemoryElement* ref = prog->make_reference("t", "A");
 
-    manager.show_errors();
+    // manager.show_errors();
 
     if(ref == nullptr) std:: cout << "BEBEBE" << std::endl;
     ref->get_value(value, 0, 4);
@@ -68,15 +68,27 @@ int main(){
     manager.revoke_access_to_shared("VSCode", "B");
     dynamic_cast<SharedSegmentDescriptor*>(b)->is_last();
     IMemoryElement* k = prog1->allocate_element<VariableDescriptor>("K", 18);
-    // prog1->destroy_element("B");
+    prog->destroy_element("A");
     std::cout << "CUR SIZE: " << prog1->get_used_memory() << std::endl;
-    manager.show_errors();
+    // manager.show_errors();
 
     std::unordered_map<std::string, IMemoryElement*> elements = manager.get_memory_elements();
     for(auto&& [name, ptr] : elements){
         std::cout << name << " " << ptr->get_size() << std::endl;
     }
 
+    for(auto elem : manager.all_errors()){
+        std::cout << elem.get_description() << std::endl;
+    }
+
+    for(auto elem : manager.dungling_reference()){
+        std::cout << "DANGLING: " << elem->get_name() << std::endl;
+    }
+    std::cout << prog->get_used_memory() << " --- " << std::endl;
+    std::cout << prog1->get_used_memory() << " --- " << std::endl;
+    for(auto [name, part] : manager.statistics()){
+        std::cout << name << " - " << part << std::endl;
+    }
     
     // Manager manager;
     // Presenter presenter(manager);

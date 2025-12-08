@@ -1,5 +1,6 @@
 #include <Memory/Program.hpp>
 #include <Memory/Manager.hpp>
+#include <iostream>
 
 namespace MemoryNameSpace{
 
@@ -42,7 +43,12 @@ bool Program::destroy_element(const std::string& name){
         record_error(MEMORY_LEAK, "The segment '" + segment->get_name() + "' is is still used by others programs.");
         return false;
     }
+    ReferenceDescriptor* ref = dynamic_cast<ReferenceDescriptor*>(it->second);
     erase_element(it->second);
+    if(ref){
+        manager_.erase_element(ref);
+        return true;
+    }
     if(manager_.destroy_element(name, *this) == false){
         insert_element(it->second);
         return false;
