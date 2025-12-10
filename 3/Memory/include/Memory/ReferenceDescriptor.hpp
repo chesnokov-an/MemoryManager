@@ -27,6 +27,7 @@ public:
     size_t get_size() const noexcept override;
     size_t get_elem_size() const noexcept override;
     size_t get_offset() const noexcept override;
+    void set_offset(size_t offset) noexcept override;
     bool is_valid() const noexcept;
     void get_raw_value(std::byte* value, size_t begin, size_t end) const override;
     void set_raw_value(const std::byte* value, size_t begin, size_t end) override;

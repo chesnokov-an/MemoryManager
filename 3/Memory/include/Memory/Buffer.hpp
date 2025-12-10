@@ -10,6 +10,11 @@
 
 namespace MemoryNameSpace{
 
+struct Block{
+    size_t offset = 0;
+    size_t size = 0;
+};
+
 class IBuffer{
 public:
     virtual std::byte* get_data() noexcept = 0;
@@ -18,12 +23,8 @@ public:
     virtual size_t get_capacity() const noexcept = 0;
     virtual size_t allocate_block(size_t size) = 0;
     virtual void destroy_block(size_t offset, size_t size) = 0;
+    virtual std::vector<Block>& get_blocks() = 0;
     virtual ~IBuffer() = default;
-};
-
-struct Block{
-    size_t offset = 0;
-    size_t size = 0;
 };
 
 template<size_t capacity_>
@@ -78,6 +79,10 @@ public:
             return;
         }
         blocks_.insert(it, Block{offset, size});
+    }
+
+    std::vector<Block>& get_blocks() override {
+        return blocks_;
     }
 };
 

@@ -13,6 +13,7 @@ public:
     virtual size_t get_size() const noexcept = 0;
     virtual size_t get_elem_size() const noexcept = 0;
     virtual size_t get_offset() const noexcept = 0;
+    virtual void set_offset(size_t offset) noexcept = 0;
     virtual void get_raw_value(std::byte* value, size_t begin, size_t end) const = 0;
     virtual void set_raw_value(const std::byte* value, size_t begin, size_t end) = 0;
     virtual ~IMemoryElement(){};

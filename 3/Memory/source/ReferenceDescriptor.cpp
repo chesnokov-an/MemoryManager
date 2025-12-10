@@ -27,6 +27,11 @@ size_t ReferenceDescriptor::get_offset() const noexcept {
     return get_element()->get_offset();
 }
 
+void ReferenceDescriptor::set_offset(size_t offset) noexcept {
+    if(is_valid() == false) return;
+    get_element()->set_offset(offset);
+}
+
 bool ReferenceDescriptor::is_valid() const noexcept {
     return (get_element() != nullptr);
 }

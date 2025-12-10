@@ -4,11 +4,11 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
+#include <cstring>
 #include <optional>
 #include <Memory/IManager.hpp>
 #include <Memory/MemoryElement.hpp>
 #include <Memory/SharedSegmentDescriptor.hpp>
-#include <iostream>
 
 namespace MemoryNameSpace{
 
@@ -128,7 +128,7 @@ public:
         error_log_.push_back(Error{type, description, &program});
     }
 
-    Program* add_program(const std::string& name, const std::string& file_path, size_t memory_limit){
+    Program* add_program(const std::string& name, const std::string& file_path, size_t memory_limit) override {
         auto it = programs_.find(name);
         if(it != programs_.end()){
             error_log_.push_back(Error{ACCESS_ERROR, "The program has already been created.", it->second.get()});
@@ -163,15 +163,15 @@ public:
         return true;
     }
 
-    std::byte* get_data() noexcept {
+    std::byte* get_data() noexcept override {
         return buffer_->get_data();
     }
 
-    const std::byte* get_data() const noexcept {
+    const std::byte* get_data() const noexcept override {
         return buffer_->get_data();
     }
 
-    constexpr size_t get_capacity() const noexcept {
+    constexpr size_t get_capacity() const noexcept override {
         return capacity_;
     }
 
@@ -207,12 +207,39 @@ public:
     }
 
 
-    std::unordered_map<std::string, IMemoryElement*> get_memory_elements() const {
+    std::unordered_map<std::string, IMemoryElement*> get_memory_elements() const override {
         std::unordered_map<std::string, IMemoryElement*> result;
         result.reserve(memory_elements_.size());
         for (auto& [name, ptr] : memory_elements_)
             result.emplace(name, ptr.get());
         return result;
+    }
+
+    void defragment_memory() override {
+        std::vector<IMemoryElement*> elems;
+        for(auto& [name, ptr] : memory_elements_)
+            elems.push_back(ptr.get());
+
+        std::sort(elems.begin(), elems.end(), [](IMemoryElement* a, IMemoryElement* b){
+                return a->get_offset() < b->get_offset();
+        });
+
+        size_t new_offset = 0;
+        for (IMemoryElement* elem : elems) {
+            size_t old_offset = elem->get_offset();
+            size_t size = elem->get_size();
+
+            if (old_offset != new_offset) {
+                std::memmove(buffer_->get_data() + new_offset, buffer_->get_data() + old_offset, size);
+                elem->set_offset(new_offset);
+            }
+            new_offset += size;
+        }
+
+        auto& blocks = buffer_->get_blocks();
+        blocks.clear();
+        if (new_offset < capacity_)
+            blocks.push_back(Block{new_offset, capacity_ - new_offset});
     }
 };
 

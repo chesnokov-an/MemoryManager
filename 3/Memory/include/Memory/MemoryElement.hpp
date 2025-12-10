@@ -23,6 +23,7 @@ public:
     size_t get_size() const noexcept override;
     size_t get_elem_size() const noexcept override;
     size_t get_offset() const noexcept override;
+    void set_offset(size_t offset) noexcept override;
     void get_raw_value(std::byte* value, size_t, size_t) const override;
     void set_raw_value(const std::byte* value, size_t , size_t) override;
     virtual ReferenceDescriptor make_reference(std::string name);
