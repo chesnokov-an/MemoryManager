@@ -18,6 +18,7 @@ include(FetchContent)
 FetchContent_Declare(
   googletest
   URL ${gtest_source_url}
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(googletest)
 

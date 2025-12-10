@@ -2,14 +2,22 @@
 
 namespace MVPNameSpace {
 
-void View::render_ui(){
-    ImGui::Begin("Memory Manager");
+const char* types[] = {"variable", "array", "shared segment", "reference"};
+int type_id = 0;
 
+void View::render_ui(){
+    bool opened = true;
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(800, 700));
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+    ImGui::Begin("Memory Manager", &opened, flags);
     if (ImGui::BeginTabBar("MainTabs"))
     {
         // ================================
         //  TAB 1 — OPERATIONS
         // ================================
+
+        
         if (ImGui::BeginTabItem("Operations"))
         {
             ImGui::Text("Operations with Variables");
@@ -19,6 +27,10 @@ void View::render_ui(){
             {
                 // TODO: call presenter
             }
+
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(150);
+            ImGui::Combo("Element type", &type_id, types, IM_ARRAYSIZE(types));
 
             if (ImGui::Button("Delete variable", ImVec2(200, 30)))
             {
@@ -44,12 +56,8 @@ void View::render_ui(){
                 // TODO
             }
 
+            ImGui::SameLine();
             if (ImGui::Button("Revoke access", ImVec2(200, 30)))
-            {
-                // TODO
-            }
-
-            if (ImGui::Button("Create link", ImVec2(200, 30)))
             {
                 // TODO
             }
@@ -65,8 +73,8 @@ void View::render_ui(){
 
 
             // --- Right side panel ---
-            ImGui::SameLine(250);
-            ImGui::BeginChild("output_block", ImVec2(350, 300), true);
+            ImGui::Separator();
+            ImGui::BeginChild("output_block", ImVec2(784, 363), true);
             ImGui::Text("Output:");
             ImGui::Separator();
             // ImGui::TextWrapped("%s", output_log.c_str());    // your presenter text
@@ -89,7 +97,7 @@ void View::render_ui(){
             int count = 4;
 
             ImGui::PlotHistogram("##MemoryUsage", values, count, 0, nullptr, 0.0f, 50.0f, ImVec2(400, 200));
-
+            
             for (int i = 0; i < count; ++i)
             {
                 ImGui::Text("%s: %.1f MB", labels[i], values[i]);
@@ -142,7 +150,8 @@ int View::show(){
     if (!glfwInit()) return -1;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    GLFWwindow* window = glfwCreateWindow(800,600,"Test",nullptr,nullptr);
+
+    GLFWwindow* window = glfwCreateWindow(800, 700, "Memory Manager",nullptr,nullptr);
     if (!window) { glfwTerminate(); return -1; }
     glfwMakeContextCurrent(window);
 
