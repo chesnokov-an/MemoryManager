@@ -163,6 +163,13 @@ public:
         return true;
     }
 
+    std::unordered_map<std::string, Program*> get_programs() const override {
+        std::unordered_map<std::string, Program*> programs;
+        for(auto&& [name, ptr] : programs_)
+            programs.insert({name, ptr.get()});
+        return programs;
+    }
+
     std::byte* get_data() noexcept override {
         return buffer_->get_data();
     }

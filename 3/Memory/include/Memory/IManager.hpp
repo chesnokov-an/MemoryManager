@@ -38,6 +38,7 @@ public:
     virtual bool revoke_access_to_shared(const std::string& prog_name, const std::string& segment_name) = 0;
 
     virtual IMemoryElement* get_element(const std::string& target_name) const = 0;
+    virtual std::unordered_map<std::string, Program*> get_programs() const = 0;
     virtual std::byte* get_data() noexcept = 0;
     virtual const std::byte* get_data() const noexcept = 0;
     virtual size_t get_capacity() const noexcept = 0;
