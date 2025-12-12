@@ -36,8 +36,7 @@ void SetComfortableDarkCyanTheme(){
     style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
     style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
 
-    auto RGBA = [](int r, int g, int b, float a)
-    {
+    auto RGBA = [](int r, int g, int b, float a){
         return ImVec4(r / 255.0f, g / 255.0f, b / 255.0f, a);
     };
 
@@ -111,7 +110,6 @@ enum class DataType {
     Double
 };
 
-
 static const char* DataTypeNames[] = {
     "bool",
     "char",
@@ -130,8 +128,7 @@ void View::render_ui(){
     ImGui::SetNextWindowSize(ImVec2(965, 960));
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
     ImGui::Begin("Memory Manager", &opened, flags);
-    if (ImGui::BeginTabBar("MainTabs"))
-    {
+    if (ImGui::BeginTabBar("MainTabs")){
         // ================================
         //  TAB 1 — OPERATIONS
         // ================================
@@ -160,19 +157,15 @@ void View::render_ui(){
 
             if (ImGui::BeginPopupModal("Create Variable Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
                 static char var_name[128] = "";
-                static int selected_type = 0;
-
+                static size_t selected_type = 0;
                 ImGui::InputText("Name", var_name, IM_ARRAYSIZE(var_name));
 
                 ImGui::Text("Type");
-                if (ImGui::BeginCombo("##datatype", DataTypeNames[selected_type]))
-                {
-                    for (int i = 0; i < IM_ARRAYSIZE(DataTypeNames); i++)
-                    {
+                if (ImGui::BeginCombo("##datatype", DataTypeNames[selected_type])){
+                    for (size_t i = 0; i < IM_ARRAYSIZE(DataTypeNames); i++){
                         bool is_selected = (selected_type == i);
                         if (ImGui::Selectable(DataTypeNames[i], is_selected))
                             selected_type = i;
-
                         if (is_selected)
                             ImGui::SetItemDefaultFocus();
                     }
@@ -181,20 +174,15 @@ void View::render_ui(){
 
                 ImGui::Separator();
 
-                static int selected_program = 0; // индекс выбранной программы
+                static size_t selected_program = 0;
                 std::vector<std::string> programs = presenter_.get_programs_names();
                 if (!programs.empty()){
-                    // Текущая выбранная программа
                     std::string prog_name = programs[selected_program];
-
-                    if (ImGui::BeginCombo("Program", prog_name.c_str()))
-                    {
-                        for (int i = 0; i < programs.size(); i++)
-                        {
+                    if (ImGui::BeginCombo("Program", prog_name.c_str())){
+                        for (size_t i = 0; i < programs.size(); i++){
                             bool is_selected = (selected_program == i);
                             if (ImGui::Selectable(programs[i].c_str(), is_selected))
                                 selected_program = i;
-
                             if (is_selected)
                                 ImGui::SetItemDefaultFocus();
                         }
@@ -208,42 +196,45 @@ void View::render_ui(){
                 ImGui::Separator();
 
                 if (ImGui::Button("Ok", ImVec2(120, 0))) {
-                    DataType type = static_cast<DataType>(selected_type);
-                    bool great_add = false;
-                    switch (type){
-                    case DataType::Bool:
-                        great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(bool));
-                        break;
-                    case DataType::Char:
-                        great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(char));
-                        break;
-                    case DataType::Int:
-                        great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(int));
-                        break;
-                    case DataType::LongLong:
-                        great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(long long));
-                        break;
-                    case DataType::SizeT:
-                        great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(size_t));
-                        break;
-                    case DataType::Double:
-                        great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(double));
-                        break;
+                    if(programs.empty()){
+                        ImGui::CloseCurrentPopup();
                     }
+                    else{
+                        DataType type = static_cast<DataType>(selected_type);
+                        bool great_add = false;
+                        switch (type){
+                        case DataType::Bool:
+                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(bool));
+                            break;
+                        case DataType::Char:
+                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(char));
+                            break;
+                        case DataType::Int:
+                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(int));
+                            break;
+                        case DataType::LongLong:
+                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(long long));
+                            break;
+                        case DataType::SizeT:
+                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(size_t));
+                            break;
+                        case DataType::Double:
+                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(double));
+                            break;
+                        }
 
-                    std::string message = great_add ? ("Variable " + std::string(var_name) + " was allocated!")
-                                                    : ("Something went wrong with allocating " + std::string(var_name));
-                    output_buffer.push_back(message);
+                        std::string message = great_add ? ("Variable " + std::string(var_name) + " was allocated!")
+                                                        : ("Something went wrong with allocating " + std::string(var_name));
+                        output_buffer.push_back(message);
 
-                    ImGui::CloseCurrentPopup();
+                        ImGui::CloseCurrentPopup();
+                    }
                 }
                 ImGui::SameLine();
 
-                // === Cancel ===
                 if (ImGui::Button("Cancel", ImVec2(120, 0))) {
                     ImGui::CloseCurrentPopup();
                 }
-
                 ImGui::EndPopup();
             }
 
@@ -422,7 +413,7 @@ int View::show(){
 
     SetComfortableDarkCyanTheme();
     ImGuiIO& io = ImGui::GetIO(); 
-    ImFont* JetBrainsFont = io.Fonts->AddFontFromFileTTF("../MVP/JetBrainsMonoNL-Medium.ttf", 24.0f);
+    io.Fonts->AddFontFromFileTTF("../MVP/JetBrainsMonoNL-Medium.ttf", 24.0f);
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
