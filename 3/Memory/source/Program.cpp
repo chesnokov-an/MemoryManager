@@ -50,8 +50,11 @@ bool Program::possible_for_expansion(size_t size) const {
 
 size_t Program::get_used_memory() const {
     size_t res = 0;
-    for(auto&& elem : memory_elements_)
-        res += elem.second->get_size();
+    for(auto&& [name, ptr] : memory_elements_){
+        ReferenceDescriptor* ref = dynamic_cast<ReferenceDescriptor*>(ptr);
+        if(!ref)
+            res += ptr->get_size();
+    }
     return res;
 }
 
