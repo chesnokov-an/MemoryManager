@@ -38,22 +38,8 @@ bool Program::destroy_element(const std::string& name){
         record_error(ACCESS_ERROR, "The variable '" + name + "' is not available for program.");
         return false;
     }
-    SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(it->second);
-    if(segment && (!segment->is_last())){
-        record_error(MEMORY_LEAK, "The segment '" + segment->get_name() + "' is is still used by others programs.");
-        return false;
-    }
-    ReferenceDescriptor* ref = dynamic_cast<ReferenceDescriptor*>(it->second);
-    erase_element(it->second);
-    if(ref){
-        manager_.erase_element(ref);
-        return true;
-    }
-    if(manager_.destroy_element(name, *this) == false){
-        insert_element(it->second);
-        return false;
-    }
-    return true;
+    if(!it->second->is_possible_to_destroy(*this)) return false;
+    return it->second->destroy(*this);
 }
 
 bool Program::possible_for_expansion(size_t size) const {

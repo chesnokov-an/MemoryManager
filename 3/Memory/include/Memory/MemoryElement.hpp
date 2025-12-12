@@ -26,6 +26,8 @@ public:
     void set_offset(size_t offset) noexcept override;
     void get_raw_value(std::byte* value, size_t, size_t) const override;
     void set_raw_value(const std::byte* value, size_t , size_t) override;
+    bool is_possible_to_destroy(const Program& prog) const override;
+    bool destroy(Program& prog) override;
     virtual ReferenceDescriptor make_reference(std::string name);
     virtual ~MemoryElement() = 0;
 };

@@ -46,6 +46,16 @@ void ReferenceDescriptor::set_raw_value(const std::byte* value, size_t begin, si
     get_element()->set_raw_value(value, begin, end);
 }
 
+bool ReferenceDescriptor::is_possible_to_destroy(__attribute__((unused)) const Program& prog) const {
+    return true;
+}
+
+bool ReferenceDescriptor::destroy(Program& prog){
+    prog.erase_element(this);
+    manager_.erase_element(this);
+    return true;
+}
+
 const std::string& ReferenceDescriptor::get_ref_name() const noexcept {
     return name_;
 }

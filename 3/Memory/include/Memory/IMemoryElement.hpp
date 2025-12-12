@@ -7,6 +7,8 @@
 
 namespace MemoryNameSpace{
 
+class Program;
+
 class IMemoryElement{
 public:
     virtual const std::string& get_name() const noexcept = 0;
@@ -16,6 +18,8 @@ public:
     virtual void set_offset(size_t offset) noexcept = 0;
     virtual void get_raw_value(std::byte* value, size_t begin, size_t end) const = 0;
     virtual void set_raw_value(const std::byte* value, size_t begin, size_t end) = 0;
+    virtual bool is_possible_to_destroy(const Program& prog) const = 0;
+    virtual bool destroy(Program& prog) = 0;
     virtual ~IMemoryElement(){};
     
     template<typename T>
