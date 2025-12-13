@@ -28,6 +28,7 @@ public:
     void set_raw_value(const std::byte* value, size_t , size_t) override;
     bool is_possible_to_destroy(const Program& prog) const override;
     bool destroy(Program& prog) override;
+    bool is_reference() const override;
     virtual ReferenceDescriptor make_reference(std::string name);
     virtual ~MemoryElement() = 0;
 };

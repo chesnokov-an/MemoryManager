@@ -20,6 +20,7 @@ public:
     virtual void set_raw_value(const std::byte* value, size_t begin, size_t end) = 0;
     virtual bool is_possible_to_destroy(const Program& prog) const = 0;
     virtual bool destroy(Program& prog) = 0;
+    virtual bool is_reference() const = 0;
     virtual ~IMemoryElement(){};
     
     template<typename T>

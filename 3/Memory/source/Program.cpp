@@ -51,8 +51,7 @@ bool Program::possible_for_expansion(size_t size) const {
 size_t Program::get_used_memory() const {
     size_t res = 0;
     for(auto&& [name, ptr] : memory_elements_){
-        ReferenceDescriptor* ref = dynamic_cast<ReferenceDescriptor*>(ptr);
-        if(!ref)
+        if(!ptr->is_reference())
             res += ptr->get_size();
     }
     return res;
@@ -64,8 +63,7 @@ const std::unordered_map<std::string, IMemoryElement*>& Program::get_memory_elem
 
 Program::~Program(){
     for(auto&& [name, ptr] : memory_elements_){
-        ReferenceDescriptor* ref = dynamic_cast<ReferenceDescriptor*>(ptr);
-        if(!ref)
+        if(!ptr->is_reference())
             manager_.record_error(MEMORY_LEAK, "The element '" + name + "' is still reachable.", *this);
     }
 }

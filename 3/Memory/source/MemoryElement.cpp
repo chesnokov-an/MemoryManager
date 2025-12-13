@@ -40,6 +40,10 @@ bool MemoryElement::destroy(Program& prog){
     return true;
 }
 
+bool MemoryElement::is_reference() const {
+    return false;
+}
+
 ReferenceDescriptor MemoryElement::make_reference(std::string name) {
     return ReferenceDescriptor{name, name_, manager_};
 }

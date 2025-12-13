@@ -34,6 +34,7 @@ public:
     void set_raw_value(const std::byte* value, size_t begin, size_t end) override;
     bool is_possible_to_destroy(const Program& prog) const override;
     bool destroy(Program& prog) override;
+    bool is_reference() const override;
     const std::string& get_ref_name() const noexcept;
 };
 
