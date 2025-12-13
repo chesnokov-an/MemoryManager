@@ -7,21 +7,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -g")
 
-# ----------------------------
-# Fetch ImGui
-# ----------------------------
 include(FetchContent)
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG v1.89.8 # укажи нужную версию
+    GIT_TAG v1.89.8
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(imgui)
 
-# ----------------------------
-# Создаем статическую библиотеку ImGui
-# ----------------------------
 add_library(imgui STATIC
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
@@ -36,9 +30,6 @@ target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}/backends
 )
 
-# ----------------------------
-# Находим GLFW и OpenGL
-# ----------------------------
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLFW REQUIRED glfw3)
@@ -51,7 +42,6 @@ add_library(MVP STATIC ${MVP_SOURCES})
 target_include_directories(MVP PUBLIC include)
 target_link_libraries(MVP PUBLIC Memory Utils Dialogue imgui ${GLFW_LIBRARIES} OpenGL::GL)
 
-# Include directories
 target_include_directories(MVP PUBLIC
     ${GLFW_INCLUDE_DIRS}
     ${IMGUI_DIR}
