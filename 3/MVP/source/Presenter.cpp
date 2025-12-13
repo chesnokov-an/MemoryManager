@@ -17,4 +17,12 @@ namespace MVPNameSpace {
         Program* prog = manager_.add_program(name, file_path, memory_limit);
         return (prog != nullptr);
     }
+
+    std::vector<std::string> Presenter::errors(){
+        std::vector<std::string> errors_list;
+        auto errors_log = manager_.all_errors();
+        for(auto&& elem : errors_log)
+            errors_list.push_back(elem.get_description());
+        return errors_list;
+    }
 }

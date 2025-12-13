@@ -364,17 +364,11 @@ void View::render_ui(){
             ImGui::Text("Errors:");
             ImGui::Separator();
 
-            ImGui::BeginChild("errors", ImVec2(400, 200), true);
-
-            // for (auto& err : error_log)
-            // {
-            //     if (err.type == ErrorType::SIZE_ERROR)
-            //         ImGui::TextColored(ImVec4(1, 0.8, 0, 1), "SIZE_ERROR: %s", err.text.c_str());
-            //     else if (err.type == ErrorType::ACCESS_ERROR)
-            //         ImGui::TextColored(ImVec4(1, 0.3, 0.3, 1), "ACCESS_ERROR: %s", err.text.c_str());
-            //     else if (err.type == ErrorType::DOUBLE_FREE)
-            //         ImGui::TextColored(ImVec4(1, 0.1, 0.1, 1), "DOUBLE_FREE: %s", err.text.c_str());
-            // }
+            ImGui::BeginChild("errors", ImVec2(925, 450), true);
+            std::vector<std::string> errors_list = presenter_.errors();
+            for(auto&& error : errors_list){
+                ImGui::TextWrapped("%s\n\n", error.c_str());
+            }
 
             ImGui::EndChild();
 
