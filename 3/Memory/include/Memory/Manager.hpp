@@ -47,7 +47,7 @@ private:
     bool check_exist_with_allocate_error(const std::string& name, const Program& program) override {
         auto it = memory_elements_.find(name);
         if(it != memory_elements_.end()){
-            error_log_.push_back(Error{MEMORY_LEAK, "Invalid write. The memory for variable '" + name + "' has already been allocated", &program});
+            error_log_.push_back(Error{MEMORY_LEAK, "Invalid write. The memory for variable '" + name + "' has already been allocated.", &program});
             return true;
         }
         return false;
@@ -56,7 +56,7 @@ private:
     bool check_exist_with_destroy_error(const std::string& name, const Program& program) override {
         auto it = memory_elements_.find(name);
         if(it == memory_elements_.end()){
-            error_log_.push_back(Error{MEMORY_LEAK, "Invalid free. The memory for variable '" + name + "' has already been free", &program});
+            error_log_.push_back(Error{MEMORY_LEAK, "Invalid free. The memory for variable '" + name + "' has already been free.", &program});
             return true;
         }
         return false;
@@ -71,12 +71,12 @@ private:
         Program* prog = prog_it->second.get();
         auto segment_it = memory_elements_.find(segment_name);
         if(segment_it == memory_elements_.end()){
-            error_log_.push_back(Error{ACCESS_ERROR, "The variable '" + segment_name + "' does not exist", prog});
+            error_log_.push_back(Error{ACCESS_ERROR, "The variable '" + segment_name + "' does not exist.", prog});
             return false;
         }
         SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(segment_it->second.get());
         if(!segment){
-            error_log_.push_back(Error{ACCESS_ERROR, "The variable '" + segment_name + "' is not shared segment", prog});
+            error_log_.push_back(Error{ACCESS_ERROR, "The variable '" + segment_name + "' is not shared segment.", prog});
             return false;
         }
         return true;
@@ -97,7 +97,7 @@ public:
         if(check_exist_with_allocate_error(name, program)) return nullptr;
         auto it = memory_elements_.find(target_name);
         if(it == memory_elements_.end()){
-            error_log_.push_back(Error{ACCESS_ERROR, "The variable named '" + target_name + "' does not exist", &program});
+            error_log_.push_back(Error{ACCESS_ERROR, "The variable named '" + target_name + "' does not exist.", &program});
             return nullptr;
         }
         MemoryElement* element = dynamic_cast<MemoryElement*>(it->second.get());

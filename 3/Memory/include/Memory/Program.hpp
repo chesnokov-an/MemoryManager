@@ -31,11 +31,12 @@ public:
     bool possible_for_expansion(size_t size) const;
     size_t get_used_memory() const;
     const std::unordered_map<std::string, IMemoryElement*>& get_memory_elements() const noexcept;
+    ~Program();
 
     template <memory_element_t Descriptor, typename... ExtraArgs>
     Descriptor* allocate_element(const std::string& name, size_t size, ExtraArgs&&... args){
         if(possible_for_expansion(size) == false){
-            manager_.record_error(SIZE_ERROR, "The memory limit in the '" + name_ + "' program has been exceeded", *this);
+            manager_.record_error(SIZE_ERROR, "The memory limit in the '" + name_ + "' program has been exceeded.", *this);
             return nullptr;
         }
         Descriptor* element = manager_.allocate_element<Descriptor>(name, size, *this, args...);

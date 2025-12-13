@@ -47,7 +47,7 @@ public:
         size_t offset_res = 0;
         auto it = std::find_if(blocks_.begin(), blocks_.end(),
                                 [size](const Block& block){ return block.size >= size; });
-        if(it == blocks_.end()) throw std::runtime_error("Buffer overflow");
+        if(it == blocks_.end()) throw std::runtime_error("Buffer overflow.");
         offset_res = it->offset;
         if(size == it->size) blocks_.erase(it);
         else{

@@ -23,7 +23,7 @@ bool SharedSegmentDescriptor::is_last() const {
 
 bool SharedSegmentDescriptor::is_possible_to_destroy(const Program& prog) const {
     if(programs_.find(prog.get_name()) == programs_.end()){
-        manager_.record_error(ACCESS_ERROR, "Program doesn't have acces for segment" + name_, prog);
+        manager_.record_error(ACCESS_ERROR, "Program doesn't have acces for segment." + name_, prog);
         return false;
     }
     if(!is_last()){

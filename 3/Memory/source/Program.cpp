@@ -62,4 +62,12 @@ const std::unordered_map<std::string, IMemoryElement*>& Program::get_memory_elem
     return memory_elements_;
 }
 
+Program::~Program(){
+    for(auto&& [name, ptr] : memory_elements_){
+        ReferenceDescriptor* ref = dynamic_cast<ReferenceDescriptor*>(ptr);
+        if(!ref)
+            manager_.record_error(MEMORY_LEAK, "The element '" + name + "' is still reachable.", *this);
+    }
+}
+
 }

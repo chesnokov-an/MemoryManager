@@ -24,16 +24,16 @@ public:
     
     template<typename T>
     void get_value(T& value, size_t begin = 0, size_t end = 0) const{
-        static_assert(std::is_trivially_copyable_v<T>, "MemoryElement::set_value<T> requires trivially copyable type T");
+        static_assert(std::is_trivially_copyable_v<T>, "MemoryElement::set_value<T> requires trivially copyable type T.");
         if (get_elem_size() != sizeof(T) && get_size() != sizeof(T))
-            throw std::runtime_error("Size mismatch in MemoryElement::get_value<T>");
+            throw std::runtime_error("Size mismatch in MemoryElement::get_value<T>.");
         get_raw_value(reinterpret_cast<std::byte*>(&value), begin, end);
     }
     template<typename T>
     void set_value(const T& value, size_t begin = 0, size_t end = 0){
-        static_assert(std::is_trivially_copyable_v<T>, "MemoryElement::get_value<T> requires trivially copyable type T");
+        static_assert(std::is_trivially_copyable_v<T>, "MemoryElement::get_value<T> requires trivially copyable type T.");
         if (get_elem_size() != sizeof(T) && get_size() != sizeof(T))
-            throw std::runtime_error("Size mismatch in MemoryElement::set_value<T>");
+            throw std::runtime_error("Size mismatch in MemoryElement::set_value<T>.");
         set_raw_value(reinterpret_cast<const std::byte*>(&value), begin, end);
     }
 };
