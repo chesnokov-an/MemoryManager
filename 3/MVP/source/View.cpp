@@ -1,8 +1,9 @@
 #include <MVP/View.hpp>
+#include <cmath>
 
 namespace MVPNameSpace {
 
-void SetComfortableDarkCyanTheme(){
+void SetComfortableNeonPlasmaTheme(){
     ImGuiStyle& style = ImGui::GetStyle();
 
     style.Alpha = 1.0f;
@@ -36,67 +37,65 @@ void SetComfortableDarkCyanTheme(){
     style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
     style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
 
-    auto RGBA = [](int r, int g, int b, float a){
+    auto RGBA = [](int r, int g, int b, float a = 1.0f){
         return ImVec4(r / 255.0f, g / 255.0f, b / 255.0f, a);
     };
 
-    ImVec4* colors = style.Colors;
-
-    colors[ImGuiCol_Text]                 = RGBA(255,255,255,1.0f);
-    colors[ImGuiCol_TextDisabled]         = RGBA(70,81,115,1.0f);
-    colors[ImGuiCol_WindowBg]             = RGBA(20,22,26,1.0f);
-    colors[ImGuiCol_ChildBg]              = RGBA(24,26,30,1.0f);
-    colors[ImGuiCol_PopupBg]              = RGBA(20,22,26,1.0f);
-    colors[ImGuiCol_Border]               = RGBA(40,43,49,1.0f);
-    colors[ImGuiCol_BorderShadow]         = RGBA(20,22,26,1.0f);
-    colors[ImGuiCol_FrameBg]              = RGBA(29,32,39,1.0f);
-    colors[ImGuiCol_FrameBgHovered]       = RGBA(40,43,49,1.0f);
-    colors[ImGuiCol_FrameBgActive]        = RGBA(40,43,49,1.0f);
-    colors[ImGuiCol_TitleBg]              = RGBA(12,14,18,1.0f);
-    colors[ImGuiCol_TitleBgActive]        = RGBA(12,14,18,1.0f);
-    colors[ImGuiCol_TitleBgCollapsed]     = RGBA(20,22,26,1.0f);
-    colors[ImGuiCol_MenuBarBg]            = RGBA(25,27,31,1.0f);
-    colors[ImGuiCol_ScrollbarBg]          = RGBA(12,14,18,1.0f);
-    colors[ImGuiCol_ScrollbarGrab]        = RGBA(30,34,38,1.0f);
-    colors[ImGuiCol_ScrollbarGrabHovered] = RGBA(40,43,49,1.0f);
-    colors[ImGuiCol_ScrollbarGrabActive]  = RGBA(30,34,38,1.0f);
-    colors[ImGuiCol_CheckMark]            = RGBA(8,242,215,1.0f);
-    colors[ImGuiCol_SliderGrab]           = RGBA(8,242,215,1.0f);
-    colors[ImGuiCol_SliderGrabActive]     = RGBA(153,246,8,1.0f);
-    colors[ImGuiCol_Button]               = RGBA(30,34,38,1.0f);
-    colors[ImGuiCol_ButtonHovered]        = RGBA(46,48,50,1.0f);
-    colors[ImGuiCol_ButtonActive]         = RGBA(39,39,39,1.0f);
-    colors[ImGuiCol_Header]               = RGBA(36,42,53,1.0f);
-    colors[ImGuiCol_HeaderHovered]        = RGBA(27,27,27,1.0f);
-    colors[ImGuiCol_HeaderActive]         = RGBA(20,22,26,1.0f);
-    colors[ImGuiCol_Separator]            = RGBA(33,38,49,1.0f);
-    colors[ImGuiCol_SeparatorHovered]     = RGBA(40,47,64,1.0f);
-    colors[ImGuiCol_SeparatorActive]      = RGBA(40,47,64,1.0f);
-    colors[ImGuiCol_ResizeGrip]           = RGBA(37,37,37,1.0f);
-    colors[ImGuiCol_ResizeGripHovered]    = RGBA(8,242,215,1.0f);
-    colors[ImGuiCol_ResizeGripActive]     = RGBA(255,255,255,1.0f);
-    colors[ImGuiCol_Tab]                  = RGBA(20,22,26,1.0f);
-    colors[ImGuiCol_TabHovered]           = RGBA(30,34,38,1.0f);
-    colors[ImGuiCol_TabActive]            = RGBA(30,34,38,1.0f);
-    colors[ImGuiCol_TabUnfocused]         = RGBA(20,22,26,1.0f);
-    colors[ImGuiCol_TabUnfocusedActive]   = RGBA(32,70,146,1.0f);
-    colors[ImGuiCol_PlotLines]            = RGBA(133,153,179,1.0f);
-    colors[ImGuiCol_PlotLinesHovered]     = RGBA(10,250,250,1.0f);
-    colors[ImGuiCol_PlotHistogram]        = RGBA(8,242,215,1.0f);
-    colors[ImGuiCol_PlotHistogramHovered] = RGBA(40,47,64,1.0f);
-    colors[ImGuiCol_TableHeaderBg]        = RGBA(12,14,18,1.0f);
-    colors[ImGuiCol_TableBorderStrong]    = RGBA(12,14,18,1.0f);
-    colors[ImGuiCol_TableBorderLight]     = RGBA(0,0,0,1.0f);
-    colors[ImGuiCol_TableRowBg]           = RGBA(30,34,38,1.0f);
-    colors[ImGuiCol_TableRowBgAlt]        = RGBA(25,27,31,1.0f);
-    colors[ImGuiCol_TextSelectedBg]       = RGBA(239,239,239,1.0f);
-    colors[ImGuiCol_DragDropTarget]       = RGBA(127,131,255,1.0f);
-    colors[ImGuiCol_NavHighlight]         = RGBA(68,74,255,1.0f);
-    colors[ImGuiCol_NavWindowingHighlight]= RGBA(127,131,255,1.0f);
-    colors[ImGuiCol_NavWindowingDimBg]    = RGBA(50,45,139,0.502f);
-    colors[ImGuiCol_ModalWindowDimBg]     = RGBA(50,45,139,0.502f);
+    ImVec4* c = style.Colors;
+    c[ImGuiCol_Text]         = RGBA(235,245,255);
+    c[ImGuiCol_TextDisabled] = RGBA(130,145,165);
+    c[ImGuiCol_WindowBg] = RGBA(22, 28, 38);
+    c[ImGuiCol_ChildBg]  = RGBA(26, 34, 46);
+    c[ImGuiCol_PopupBg]  = RGBA(24, 30, 42);
+    c[ImGuiCol_Border]       = RGBA(60, 90, 120);
+    c[ImGuiCol_BorderShadow]= RGBA(0, 0, 0, 0);
+    c[ImGuiCol_FrameBg]        = RGBA(35, 50, 70);
+    c[ImGuiCol_FrameBgHovered] = RGBA(55, 90, 120);
+    c[ImGuiCol_FrameBgActive]  = RGBA(80, 130, 170);
+    c[ImGuiCol_TitleBg]          = RGBA(18, 24, 36);
+    c[ImGuiCol_TitleBgActive]   = RGBA(22, 30, 46);
+    c[ImGuiCol_TitleBgCollapsed]= RGBA(18, 24, 36);
+    c[ImGuiCol_MenuBarBg]       = RGBA(26, 36, 52);
+    c[ImGuiCol_ScrollbarBg]          = RGBA(18, 24, 36);
+    c[ImGuiCol_ScrollbarGrab]        = RGBA(70, 130, 180);
+    c[ImGuiCol_ScrollbarGrabHovered] = RGBA(100, 190, 255);
+    c[ImGuiCol_ScrollbarGrabActive]  = RGBA(140, 220, 255);
+    c[ImGuiCol_CheckMark]        = RGBA(0, 255, 210);
+    c[ImGuiCol_SliderGrab]       = RGBA(0, 220, 255);
+    c[ImGuiCol_SliderGrabActive] = RGBA(180, 255, 0);
+    c[ImGuiCol_Button]        = RGBA(40, 70, 95);
+    c[ImGuiCol_ButtonHovered] = RGBA(80, 150, 200);
+    c[ImGuiCol_ButtonActive]  = RGBA(0, 240, 255);
+    c[ImGuiCol_Header]        = RGBA(55, 85, 120);
+    c[ImGuiCol_HeaderHovered] = RGBA(90, 160, 220);
+    c[ImGuiCol_HeaderActive]  = RGBA(0, 200, 255);
+    c[ImGuiCol_Tab]                = RGBA(30, 42, 60);
+    c[ImGuiCol_TabHovered]         = RGBA(40, 110, 150);
+    c[ImGuiCol_TabActive]          = RGBA(80, 150, 200);
+    c[ImGuiCol_TabUnfocused]       = RGBA(25, 34, 50);
+    c[ImGuiCol_TabUnfocusedActive] = RGBA(60, 120, 190);
+    c[ImGuiCol_TableHeaderBg] = RGBA(22, 30, 46);
+    c[ImGuiCol_TableBorderStrong] = RGBA(60, 90, 120);
+    c[ImGuiCol_TableBorderLight]  = RGBA(30, 45, 65);
+    c[ImGuiCol_TableRowBg]    = RGBA(28, 38, 56);
+    c[ImGuiCol_TableRowBgAlt] = RGBA(34, 46, 68);
+    c[ImGuiCol_TextSelectedBg]        = RGBA(0, 220, 255, 0.35f);
+    c[ImGuiCol_DragDropTarget]        = RGBA(255, 0, 255);
+    c[ImGuiCol_NavHighlight]          = RGBA(0, 255, 255);
+    c[ImGuiCol_NavWindowingHighlight] = RGBA(255, 0, 255);
+    c[ImGuiCol_NavWindowingDimBg]     = RGBA(20, 30, 60, 0.6f);
+    c[ImGuiCol_ModalWindowDimBg]     = RGBA(50,45,139,0.502f);
+    c[ImGuiCol_PlotLines]            = RGBA(133,153,179,1.0f);
+    c[ImGuiCol_PlotLinesHovered]     = RGBA(10,250,250,1.0f);
+    c[ImGuiCol_PlotHistogram]        = RGBA(8,242,215,1.0f);
+    c[ImGuiCol_PlotHistogramHovered] = RGBA(80,150,200,1.0f);
 }
 
+enum class ThemeMode
+{
+    Normal,
+    RGBHell
+};
 
 const char* types[] = {"variable", "array", "shared segment", "reference"};
 int type_id = 0;
@@ -123,7 +122,6 @@ std::vector<std::string> output_buffer;
 
 void View::render_ui(){
     bool opened = true;
-
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(965, 960));
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
@@ -247,11 +245,13 @@ void View::render_ui(){
                 // TODO
             }
 
+            ImGui::SameLine();
             if (ImGui::Button("Set value", ImVec2(300, 35)))
             {
                 // TODO
             }
 
+            ImGui::SameLine();
             if (ImGui::Button("Get value", ImVec2(300, 35)))
             {
                 // TODO
@@ -322,17 +322,17 @@ void View::render_ui(){
 
             // --- Right side panel ---
             ImGui::Separator();
-            ImGui::BeginChild("output_block", ImVec2(925, 363), true);
+            ImGui::BeginChild("output_block", ImVec2(925, 450), true);
             ImGui::Text("Output:");
             ImGui::Separator();
             for(auto&& message : output_buffer){
                 ImGui::TextWrapped("%s", message.c_str());
             }
-            ImGui::EndChild();
+            ImGui::EndChild();           
 
             ImGui::EndTabItem();
         }
-
+        
         // ================================
         //  TAB 2 — MEMORY MONITOR
         // ================================
@@ -403,9 +403,9 @@ int View::show(){
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
-    
 
-    SetComfortableDarkCyanTheme();
+    SetComfortableNeonPlasmaTheme();
+    
     ImGuiIO& io = ImGui::GetIO(); 
     io.Fonts->AddFontFromFileTTF("../MVP/JetBrainsMonoNL-Medium.ttf", 24.0f);
 
