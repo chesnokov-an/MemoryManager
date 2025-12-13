@@ -122,6 +122,7 @@ std::vector<std::string> output_buffer;
 
 void View::render_ui(){
     bool opened = true;
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(965, 960));
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
@@ -153,6 +154,7 @@ void View::render_ui(){
                 }
             }
 
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
             if (ImGui::BeginPopupModal("Create Variable Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
                 static char var_name[128] = "";
                 static size_t selected_type = 0;
@@ -221,8 +223,8 @@ void View::render_ui(){
                             break;
                         }
 
-                        std::string message = great_add ? ("Variable " + std::string(var_name) + " was allocated!")
-                                                        : ("Something went wrong with allocating " + std::string(var_name));
+                        std::string message = great_add ? ("Variable " + std::string(var_name) + " was allocated")
+                                                        : ("Something went wrong with allocating " + std::string(var_name) + "!");
                         output_buffer.push_back(message);
 
                         ImGui::CloseCurrentPopup();
@@ -276,16 +278,17 @@ void View::render_ui(){
             ImGui::Text("System");
             ImGui::Separator();
 
-            if (ImGui::Button("Defragment memory", ImVec2(300, 35)))
-            {
-                // TODO
+            if (ImGui::Button("Defragment memory", ImVec2(300, 35))){
+                presenter_.defragment();
+                output_buffer.push_back("Memory was defragmented");
             }
 
             ImGui::SameLine();
             if (ImGui::Button("Open Program", ImVec2(300, 35))){
                 ImGui::OpenPopup("Open Program Popup");
             }
-
+            
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
             if (ImGui::BeginPopupModal("Open Program Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
                 static char prog_name[128] = "";
                 static char file_path[128] = "";
@@ -298,29 +301,62 @@ void View::render_ui(){
                 bool great_add = false;
                 if (ImGui::Button("Ok", ImVec2(120, 0))) {
                     great_add = presenter_.add_program(prog_name, file_path, memory_limit);
-                    std::string message = great_add ? ("Program " + std::string(prog_name) + " was opened!")
-                                                    : ("Something went wrong with openning " + std::string(prog_name));
+                    std::string message = great_add ? ("Program " + std::string(prog_name) + " was opened")
+                                                    : ("Something went wrong with openning " + std::string(prog_name) + "!");
                     output_buffer.push_back(message);
                     ImGui::CloseCurrentPopup();
                 }
                 ImGui::SameLine();
-
-                // === Cancel ===
                 if (ImGui::Button("Cancel", ImVec2(120, 0))) {
                     ImGui::CloseCurrentPopup();
                 }
-
                 ImGui::EndPopup();
             }
 
             ImGui::SameLine();
-            if (ImGui::Button("Close Program", ImVec2(300, 35)))
-            {
-                // TODO
+            if (ImGui::Button("Close Program", ImVec2(300, 35))){
+                ImGui::OpenPopup("Close Program Popup");
+            }
+            
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Close Program Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
+                static size_t selected_program = 0;
+                std::vector<std::string> programs = presenter_.get_programs_names();
+                if (!programs.empty()){
+                    std::string prog_name = programs[selected_program];
+                    if (ImGui::BeginCombo("Program", prog_name.c_str())){
+                        for (size_t i = 0; i < programs.size(); i++){
+                            bool is_selected = (selected_program == i);
+                            if (ImGui::Selectable(programs[i].c_str(), is_selected))
+                                selected_program = i;
+                            if (is_selected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+                }
+                else{
+                    ImGui::TextDisabled("There are no available programs");
+                }
+
+                ImGui::Separator();
+                if (ImGui::Button("Ok", ImVec2(120, 0))) {
+                    if(programs.empty()){
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else{
+                        presenter_.delete_program(programs[selected_program]);
+                        output_buffer.push_back("Program '" + programs[selected_program] + "' was closed.");
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
             }
 
-
-            // --- Right side panel ---
             ImGui::Separator();
             ImGui::BeginChild("output_block", ImVec2(925, 450), true);
             ImGui::Text("Output:");
@@ -373,13 +409,12 @@ void View::render_ui(){
             ImGui::EndChild();
 
             ImGui::Spacing();
-            ImGui::Text("Dangling links:");
+            ImGui::Text("Dangling references:");
             ImGui::Separator();
-
-            // for (auto& link : dangling_links)
-            // {
-            //     ImGui::TextColored(ImVec4(0.5, 0.7, 1, 1), "%s", link.c_str());
-            // }
+            std::vector<std::string> dangling_references = presenter_.dungling_reference();
+            for (auto& ref : dangling_references){
+                ImGui::TextColored(ImVec4(0.5, 0.7, 1, 1), "%s", ref.c_str());
+            }
 
             ImGui::EndTabItem();
         }

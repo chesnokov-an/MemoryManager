@@ -19,7 +19,10 @@ public:
     bool allocate_variable(const std::string& prog, const std::string& name, size_t size);
     std::vector<std::string> get_programs_names();
     bool add_program(const std::string& name, const std::string& file_path, size_t memory_limit);
+    void delete_program(const std::string& name);
+    void defragment();
     std::vector<std::string> errors();
+    std::vector<std::string> dungling_reference();
 };
 
 }

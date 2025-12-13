@@ -29,7 +29,7 @@ ReferenceDescriptor* Program::make_reference(const std::string& name, const std:
 }
 
 void Program::record_error(size_t type, const std::string& description){
-    manager_.record_error(type, description, *this);
+    manager_.record_error(type, description, name_);
 }
 
 bool Program::destroy_element(const std::string& name){
@@ -38,7 +38,7 @@ bool Program::destroy_element(const std::string& name){
         record_error(ACCESS_ERROR, "The variable '" + name + "' is not available for program.");
         return false;
     }
-    if(!it->second->is_possible_to_destroy(*this)) return false;
+    if(!it->second->is_possible_to_destroy(name_)) return false;
     return it->second->destroy(*this);
 }
 
@@ -64,7 +64,7 @@ const std::unordered_map<std::string, IMemoryElement*>& Program::get_memory_elem
 Program::~Program(){
     for(auto&& [name, ptr] : memory_elements_){
         if(!ptr->is_reference())
-            manager_.record_error(MEMORY_LEAK, "The element '" + name + "' is still reachable.", *this);
+            manager_.record_error(MEMORY_LEAK, "The element '" + name + "' is still reachable.", name_);
     }
 }
 

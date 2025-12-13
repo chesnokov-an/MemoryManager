@@ -19,13 +19,13 @@ class Error final{
 private:
     error_t type_;
     std::string description_;
-    const Program * const program_;
+    std::string program_name_;
 
 public:
-    Error(size_t type, std::string description, const Program * const program)
-            : type_(static_cast<error_t>(type)), description_(description), program_(program) {}
+    Error(size_t type, std::string description, const std::string& program_name)
+            : type_(static_cast<error_t>(type)), description_(description), program_name_(program_name) {}
     std::string get_description() const;
-    const Program& get_program() const;
+    const std::string& get_program() const;
 };
 
 }

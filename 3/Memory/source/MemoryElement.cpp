@@ -27,7 +27,7 @@ void MemoryElement::set_raw_value(const std::byte* value, size_t, size_t){
     std::copy(value, value + size_, target);
 }
 
-bool MemoryElement::is_possible_to_destroy(__attribute__((unused)) const Program& prog) const {
+bool MemoryElement::is_possible_to_destroy(__attribute__((unused)) const std::string& prog) const {
     return true;
 }
 

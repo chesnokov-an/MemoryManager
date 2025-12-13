@@ -32,7 +32,8 @@ public:
     virtual ReferenceDescriptor* make_reference(const std::string& name, const std::string& target_name, const Program& program) = 0;
     virtual bool destroy_element(const std::string& name, const Program& program) = 0;
     virtual Program* add_program(const std::string& name, const std::string& file_path, size_t memory_limit) = 0;
-    virtual void record_error(size_t type, const std::string& description, const Program& program) = 0;
+    virtual void delete_program(const std::string& name) = 0;
+    virtual void record_error(size_t type, const std::string& description, const std::string& program) = 0;
     
     virtual bool get_access_to_shared(const std::string& prog_name, const std::string& segment_name) = 0;
     virtual bool revoke_access_to_shared(const std::string& prog_name, const std::string& segment_name) = 0;
@@ -45,7 +46,7 @@ public:
     virtual std::unordered_map<std::string, IMemoryElement*> get_memory_elements() const = 0;
 
     virtual std::vector<Error> all_errors() const = 0;
-    virtual std::vector<Error> program_errors(const Program& program) const = 0;
+    virtual std::vector<Error> program_errors(const std::string& program_name) const = 0;
     virtual std::vector<ReferenceDescriptor*> dungling_reference() const = 0;
     virtual std::unordered_map<std::string, double> statistics() const = 0;
     virtual void defragment_memory() = 0;

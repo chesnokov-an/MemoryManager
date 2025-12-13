@@ -18,6 +18,14 @@ namespace MVPNameSpace {
         return (prog != nullptr);
     }
 
+    void Presenter::delete_program(const std::string& name){
+        manager_.delete_program(name);
+    }
+
+    void Presenter::defragment(){
+        manager_.defragment_memory();
+    }
+
     std::vector<std::string> Presenter::errors(){
         std::vector<std::string> errors_list;
         auto errors_log = manager_.all_errors();
@@ -25,4 +33,14 @@ namespace MVPNameSpace {
             errors_list.push_back(elem.get_description());
         return errors_list;
     }
+
+    std::vector<std::string> Presenter::dungling_reference(){
+        std::vector<std::string> references;
+        auto cur_refs = manager_.dungling_reference();
+        for(auto&& elem : cur_refs)
+            references.push_back(elem->get_name());
+        return references;
+    }
+
+
 }

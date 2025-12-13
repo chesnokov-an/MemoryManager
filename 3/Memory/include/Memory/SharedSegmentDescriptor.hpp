@@ -20,7 +20,7 @@ public:
     void insert_program(const Program* program);
     void erase_program(const Program* program);
     bool check_access(const std::string& name) const;
-    bool is_possible_to_destroy(const Program& prog) const override;
+    bool is_possible_to_destroy(const std::string& prog) const override;
     bool is_last() const;
 };
 

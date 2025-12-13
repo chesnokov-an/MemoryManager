@@ -21,8 +21,8 @@ bool SharedSegmentDescriptor::is_last() const {
     return programs_.size() == 1;
 }
 
-bool SharedSegmentDescriptor::is_possible_to_destroy(const Program& prog) const {
-    if(programs_.find(prog.get_name()) == programs_.end()){
+bool SharedSegmentDescriptor::is_possible_to_destroy(const std::string& prog) const {
+    if(programs_.find(prog) == programs_.end()){
         manager_.record_error(ACCESS_ERROR, "Program doesn't have acces for segment." + name_, prog);
         return false;
     }
