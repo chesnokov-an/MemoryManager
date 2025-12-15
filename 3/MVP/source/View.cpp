@@ -3,6 +3,34 @@
 
 namespace MVPNameSpace {
 
+auto RGBA = [](int r, int g, int b, float a = 1.0f){
+    return ImVec4(r / 255.0f, g / 255.0f, b / 255.0f, a);
+};
+
+void set_blue_button(){
+    ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] = RGBA(80, 150, 200);
+    ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]  = RGBA(0, 240, 255);
+}
+
+void set_red_button(){
+    ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] = RGBA(227, 0, 34);
+    ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]  = RGBA(128, 0, 0);
+}
+
+void set_green_button(){
+    ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] = RGBA(50, 205, 50);
+    ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]  = RGBA(25, 89, 5);
+}
+
+void set_yellow_text(){
+    ImGui::GetStyle().Colors[ImGuiCol_Text] = RGBA(255 ,216, 0);
+}
+
+void set_normal_text(){
+    ImGui::GetStyle().Colors[ImGuiCol_Text] = RGBA(235, 245, 255);
+}
+
+
 void SetComfortableNeonPlasmaTheme(){
     ImGuiStyle& style = ImGui::GetStyle();
 
@@ -36,10 +64,6 @@ void SetComfortableNeonPlasmaTheme(){
     style.ColorButtonPosition = ImGuiDir_Right;
     style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
     style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
-
-    auto RGBA = [](int r, int g, int b, float a = 1.0f){
-        return ImVec4(r / 255.0f, g / 255.0f, b / 255.0f, a);
-    };
 
     ImVec4* c = style.Colors;
     c[ImGuiCol_Text]         = RGBA(235,245,255);
@@ -171,6 +195,7 @@ void View::render_ui(){
             ImGui::Text("Operations with Variables");
             ImGui::Separator();
 
+            set_green_button();
             if (ImGui::Button("Create element", ImVec2(300, 35))){
                 switch (type_id){
                 case 0:
@@ -187,6 +212,7 @@ void View::render_ui(){
                     break;
                 }
             }
+            set_blue_button();
 
             ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
             if (ImGui::BeginPopupModal("Create Variable Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
@@ -431,10 +457,12 @@ void View::render_ui(){
             ImGui::SetNextItemWidth(300);
             ImGui::Combo("Element type", &type_id, types, IM_ARRAYSIZE(types));
 
-            if (ImGui::Button("Delete variable", ImVec2(300, 35)))
+            set_red_button();
+            if (ImGui::Button("Delete element", ImVec2(300, 35)))
             {
                 // TODO
             }
+            set_blue_button();
 
             ImGui::SameLine();
             if (ImGui::Button("Set value", ImVec2(300, 35)))
@@ -467,15 +495,11 @@ void View::render_ui(){
             ImGui::Text("System");
             ImGui::Separator();
 
-            if (ImGui::Button("Defragment memory", ImVec2(300, 35))){
-                presenter_.defragment();
-                output_buffer.push_back("Memory was defragmented");
-            }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Open Program", ImVec2(300, 35))){
+            set_green_button();
+            if (ImGui::Button("Open program", ImVec2(300, 35))){
                 ImGui::OpenPopup("Open Program Popup");
             }
+            set_blue_button();
             
             ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
             if (ImGui::BeginPopupModal("Open Program Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
@@ -502,10 +526,11 @@ void View::render_ui(){
                 ImGui::EndPopup();
             }
 
-            ImGui::SameLine();
-            if (ImGui::Button("Close Program", ImVec2(300, 35))){
+            set_red_button();
+            if (ImGui::Button("Close program", ImVec2(300, 35))){
                 ImGui::OpenPopup("Close Program Popup");
             }
+            set_blue_button();
             
             ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
             if (ImGui::BeginPopupModal("Close Program Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
@@ -532,12 +557,21 @@ void View::render_ui(){
                 ImGui::EndPopup();
             }
 
+            ImGui::SameLine();
+            if (ImGui::Button("Defragment memory", ImVec2(300, 35))){
+                presenter_.defragment();
+                output_buffer.push_back("Memory was defragmented");
+            }
+
             ImGui::Separator();
-            ImGui::BeginChild("output_block", ImVec2(925, 450), true);
+            ImGui::BeginChild("output_block", ImVec2(925, 400), true);
             ImGui::Text("Output:");
             ImGui::Separator();
             for(auto&& message : output_buffer){
+                if(message[message.length() - 1] == '!')
+                    set_yellow_text();
                 ImGui::TextWrapped("%s", message.c_str());
+                set_normal_text();
             }
             ImGui::EndChild();           
 
@@ -574,12 +608,14 @@ void View::render_ui(){
         {
             ImGui::Text("Errors:");
             ImGui::Separator();
-
+            
             ImGui::BeginChild("errors", ImVec2(925, 450), true);
             std::vector<std::string> errors_list = presenter_.errors();
+            set_yellow_text();
             for(auto&& error : errors_list){
                 ImGui::TextWrapped("%s\n\n", error.c_str());
             }
+            set_normal_text();
 
             ImGui::EndChild();
 
