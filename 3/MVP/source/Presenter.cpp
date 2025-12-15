@@ -44,6 +44,16 @@ namespace MVPNameSpace {
         manager_.defragment_memory();
     }
 
+    void Presenter::statistics(std::vector<float>& values, std::vector<std::string>& names){
+        auto stat = manager_.statistics();
+        values.reserve(stat.size());
+        names.reserve(stat.size());
+        for(auto&& [name, value] : stat){
+            values.push_back(value);
+            names.push_back(name);
+        }
+    }
+
     std::vector<std::string> Presenter::errors(){
         std::vector<std::string> errors_list;
         auto errors_log = manager_.all_errors();

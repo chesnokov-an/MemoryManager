@@ -14,9 +14,9 @@ class View final {
 private:
     Presenter& presenter_;
 
-    std::vector<std::string> program_combo(size_t& selected_program);
+    std::vector<std::string> program_combo(size_t& selected_program, size_t* selected_element = nullptr);
     void type_combo(size_t& selected_type);
-    std::vector<std::string> elements_combo(size_t& selected_element, 
+    std::vector<std::string> elements_combo(size_t& selected_element,
             const std::vector<std::string>& programs, size_t& selected_program);
 
 public:

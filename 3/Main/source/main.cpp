@@ -97,7 +97,7 @@ int main(){
 
     using namespace MVPNameSpace;
 
-    Manager<10> manager;
+    Manager<100> manager;
     Presenter presenter(manager);
     View view(presenter);
 

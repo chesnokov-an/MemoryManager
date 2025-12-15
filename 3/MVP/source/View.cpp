@@ -237,7 +237,8 @@ static const char* DataTypeNames[] = {
 
 std::vector<std::string> output_buffer;
 
-std::vector<std::string> View::program_combo(size_t& selected_program){
+std::vector<std::string> View::program_combo(size_t& selected_program, size_t* selected_element){
+    if(selected_element != nullptr) *selected_element = 0;
     std::vector<std::string> programs = presenter_.get_programs_names();
     if (!programs.empty()){
         std::string prog_name = programs[selected_program];
@@ -276,7 +277,7 @@ std::vector<std::string> View::elements_combo(size_t& selected_element
     std::vector<std::string> elements = programs.empty()
             ? std::vector<std::string>()
             : presenter_.get_elements_by_program(programs[selected_program]);
-                
+
     if (!programs.empty() && !elements.empty()){
         std::string elem_name = elements[selected_element];
         if (ImGui::BeginCombo("Elements", elem_name.c_str())){
@@ -521,9 +522,8 @@ void View::render_ui(){
                 ImGui::Separator();
 
                 static size_t selected_program = 0;
-                std::vector<std::string> programs = program_combo(selected_program);
-
                 static size_t selected_element = 0;
+                std::vector<std::string> programs = program_combo(selected_program, &selected_element);
                 std::vector<std::string> elements = elements_combo(selected_element, programs, selected_program);
 
                 ImGui::Separator();
@@ -565,9 +565,9 @@ void View::render_ui(){
             ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
             if (ImGui::BeginPopupModal("Delete element Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
                 static size_t selected_program = 0;
-                std::vector<std::string> programs = program_combo(selected_program);
-
                 static size_t selected_element = 0;
+
+                std::vector<std::string> programs = program_combo(selected_program, &selected_element);
                 std::vector<std::string> elements = elements_combo(selected_element, programs, selected_program);
 
                 ImGui::Separator();
@@ -722,21 +722,18 @@ void View::render_ui(){
         // ================================
         //  TAB 2 — MEMORY MONITOR
         // ================================
-        if (ImGui::BeginTabItem("Monitor"))
-        {
+        if (ImGui::BeginTabItem("Monitor")){
             ImGui::Text("Memory usage by programs");
             ImGui::Separator();
 
-            // Demo bar chart
-            float values[] = { 40, 22, 33, 12 };
-            const char* labels[] = { "Prog1", "Prog2", "Prog3", "Prog4" };
-            int count = 4;
+            std::vector<float> values;
+            std::vector<std::string> labels;
+            presenter_.statistics(values, labels);
 
-            ImGui::PlotHistogram("##MemoryUsage", values, count, 0, nullptr, 0.0f, 50.0f, ImVec2(400, 200));
+            ImGui::PlotHistogram("##MemoryUsage", values.data(), values.size(), 0, nullptr, 0.0f, 1.0f, ImVec2(600, 300));
             
-            for (int i = 0; i < count; ++i)
-            {
-                ImGui::Text("%s: %.1f MB", labels[i], values[i]);
+            for (size_t i = 0; i < labels.size(); ++i){
+                ImGui::Text("%s: %.1f MB", labels[i].c_str(), values[i]);
             }
 
             ImGui::EndTabItem();

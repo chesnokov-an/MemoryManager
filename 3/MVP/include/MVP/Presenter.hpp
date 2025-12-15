@@ -24,6 +24,7 @@ public:
     bool make_reference(const std::string& name, const std::string& target_name, const std::string& prog);
     bool delete_element(const std::string& name, const std::string& prog);
     void defragment();
+    void statistics(std::vector<float>& values, std::vector<std::string>& names);
     std::vector<std::string> errors();
     std::vector<std::string> dungling_reference();
 
