@@ -3,11 +3,22 @@
 
 namespace MVPNameSpace {
 
+static void framebuffer_size_callback(GLFWwindow* window, __attribute__((unused)) int width, __attribute__((unused)) int height){
+    glfwSetWindowSize(window, 965, 980);
+}
+
+bool lightTheme = false;
+
 auto RGBA = [](int r, int g, int b, float a = 1.0f){
     return ImVec4(r / 255.0f, g / 255.0f, b / 255.0f, a);
 };
 
 void set_blue_button(){
+    if(lightTheme){
+        ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] = RGBA(255, 215, 130);
+        ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]  = RGBA(255, 195, 90);
+        return;
+    }
     ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] = RGBA(80, 150, 200);
     ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]  = RGBA(0, 240, 255);
 }
@@ -23,10 +34,18 @@ void set_green_button(){
 }
 
 void set_yellow_text(){
+    if(lightTheme){
+        ImGui::GetStyle().Colors[ImGuiCol_Text] = RGBA(159, 0, 197);
+        return;
+    }
     ImGui::GetStyle().Colors[ImGuiCol_Text] = RGBA(255 ,216, 0);
 }
 
 void set_normal_text(){
+    if(lightTheme){
+        ImGui::GetStyle().Colors[ImGuiCol_Text] = RGBA(45, 45, 45);
+        return;
+    }
     ImGui::GetStyle().Colors[ImGuiCol_Text] = RGBA(235, 245, 255);
 }
 
@@ -115,11 +134,85 @@ void SetComfortableNeonPlasmaTheme(){
     c[ImGuiCol_PlotHistogramHovered] = RGBA(80,150,200,1.0f);
 }
 
-enum class ThemeMode
-{
-    Normal,
-    RGBHell
-};
+void SetComfortableLightCreamTheme(){
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Alpha = 1.0f;
+    style.DisabledAlpha = 0.6f;
+    style.WindowPadding = ImVec2(20.0f, 20.0f);
+    style.WindowRounding = 11.5f;
+    style.WindowBorderSize = 1.0f;
+    style.WindowMinSize = ImVec2(20.0f, 20.0f);
+    style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+    style.WindowMenuButtonPosition = ImGuiDir_None;
+    style.ChildRounding = 20.0f;
+    style.ChildBorderSize = 1.0f;
+    style.PopupRounding = 17.4f;
+    style.PopupBorderSize = 1.0f;
+    style.FramePadding = ImVec2(20.0f, 3.4f);
+    style.FrameRounding = 11.9f;
+    style.FrameBorderSize = 1.0f;
+    style.ItemSpacing = ImVec2(8.9f, 13.4f);
+    style.ItemInnerSpacing = ImVec2(7.1f, 1.8f);
+    style.CellPadding = ImVec2(12.1f, 9.2f);
+    style.ScrollbarSize = 11.6f;
+    style.ScrollbarRounding = 15.9f;
+    style.GrabMinSize = 3.7f;
+    style.GrabRounding = 20.0f;
+    style.TabRounding = 9.8f;
+    style.TabBorderSize = 0.0f;
+    style.ColorButtonPosition = ImGuiDir_Right;
+    style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
+    style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
+
+    ImVec4* c = style.Colors;
+    c[ImGuiCol_Text]         = RGBA(45, 45, 45);
+    c[ImGuiCol_TextDisabled] = RGBA(140, 140, 140);
+    c[ImGuiCol_WindowBg] = RGBA(252, 248, 235);
+    c[ImGuiCol_ChildBg]  = RGBA(248, 243, 225);
+    c[ImGuiCol_PopupBg]  = RGBA(255, 251, 240);
+    c[ImGuiCol_Border]        = RGBA(215, 205, 170);
+    c[ImGuiCol_BorderShadow] = RGBA(0, 0, 0, 0);
+    c[ImGuiCol_FrameBg]        = RGBA(245, 236, 200);
+    c[ImGuiCol_FrameBgHovered] = RGBA(255, 230, 160);
+    c[ImGuiCol_FrameBgActive]  = RGBA(255, 215, 120);
+    c[ImGuiCol_TitleBg]          = RGBA(245, 236, 200);
+    c[ImGuiCol_TitleBgActive]   = RGBA(255, 228, 155);
+    c[ImGuiCol_TitleBgCollapsed]= RGBA(245, 236, 200);
+    c[ImGuiCol_MenuBarBg]       = RGBA(248, 241, 215);
+    c[ImGuiCol_ScrollbarBg]          = RGBA(248, 243, 225);
+    c[ImGuiCol_ScrollbarGrab]        = RGBA(220, 200, 120);
+    c[ImGuiCol_ScrollbarGrabHovered] = RGBA(240, 210, 120);
+    c[ImGuiCol_ScrollbarGrabActive]  = RGBA(255, 195, 90);
+    c[ImGuiCol_CheckMark]        = RGBA(200, 160, 40);
+    c[ImGuiCol_SliderGrab]       = RGBA(220, 170, 60);
+    c[ImGuiCol_SliderGrabActive] = RGBA(255, 190, 70);
+    c[ImGuiCol_Button]        = RGBA(245, 226, 165);
+    c[ImGuiCol_ButtonHovered] = RGBA(255, 215, 130);
+    c[ImGuiCol_ButtonActive]  = RGBA(255, 195, 90);
+    c[ImGuiCol_Header]        = RGBA(245, 226, 165);
+    c[ImGuiCol_HeaderHovered] = RGBA(255, 215, 130);
+    c[ImGuiCol_HeaderActive]  = RGBA(255, 195, 90);
+    c[ImGuiCol_Tab]                = RGBA(240, 228, 190);
+    c[ImGuiCol_TabHovered]         = RGBA(255, 215, 130);
+    c[ImGuiCol_TabActive]          = RGBA(255, 200, 100);
+    c[ImGuiCol_TabUnfocused]       = RGBA(235, 225, 190);
+    c[ImGuiCol_TabUnfocusedActive] = RGBA(245, 210, 120);
+    c[ImGuiCol_TableHeaderBg]   = RGBA(245, 226, 165);
+    c[ImGuiCol_TableBorderStrong] = RGBA(220, 200, 120);
+    c[ImGuiCol_TableBorderLight]  = RGBA(235, 220, 170);
+    c[ImGuiCol_TableRowBg]      = RGBA(252, 248, 235);
+    c[ImGuiCol_TableRowBgAlt]   = RGBA(248, 243, 225);
+    c[ImGuiCol_TextSelectedBg] = RGBA(255, 215, 120, 0.4f);
+    c[ImGuiCol_DragDropTarget] = RGBA(255, 170, 0);
+    c[ImGuiCol_NavHighlight]  = RGBA(255, 190, 70);
+    c[ImGuiCol_NavWindowingHighlight] = RGBA(255, 170, 0);
+    c[ImGuiCol_NavWindowingDimBg] = RGBA(255, 240, 200, 0.6f);
+    c[ImGuiCol_ModalWindowDimBg] = RGBA(220, 200, 120, 0.35f);
+    c[ImGuiCol_PlotLines]            = RGBA(160, 130, 50);
+    c[ImGuiCol_PlotLinesHovered]     = RGBA(255, 170, 0);
+    c[ImGuiCol_PlotHistogram]        = RGBA(240, 180, 80);
+    c[ImGuiCol_PlotHistogramHovered] = RGBA(255, 200, 100);
+}
 
 const char* types[] = {"variable", "array", "shared segment", "reference"};
 int type_id = 0;
@@ -182,7 +275,7 @@ void View::render_ui(){
     bool opened = true;
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(ImVec2(965, 960));
+    ImGui::SetNextWindowSize(ImVec2(965, 980));
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
     ImGui::Begin("Memory Manager", &opened, flags);
     if (ImGui::BeginTabBar("MainTabs")){
@@ -564,7 +657,7 @@ void View::render_ui(){
             }
 
             ImGui::Separator();
-            ImGui::BeginChild("output_block", ImVec2(925, 400), true);
+            ImGui::BeginChild("output_block", ImVec2(925, 390), true);
             ImGui::Text("Output:");
             ImGui::Separator();
             for(auto&& message : output_buffer){
@@ -573,10 +666,19 @@ void View::render_ui(){
                 ImGui::TextWrapped("%s", message.c_str());
                 set_normal_text();
             }
-            ImGui::EndChild();           
+            ImGui::EndChild();
+
+            if (ImGui::Checkbox("Light theme", &lightTheme))
+            {
+                if (lightTheme)
+                    SetComfortableLightCreamTheme();
+                else
+                    SetComfortableNeonPlasmaTheme();
+            }
 
             ImGui::EndTabItem();
         }
+
         
         // ================================
         //  TAB 2 — MEMORY MONITOR
@@ -641,9 +743,11 @@ int View::show(){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-    GLFWwindow* window = glfwCreateWindow(965, 960, "Memory Manager",nullptr,nullptr);
+    GLFWwindow* window = glfwCreateWindow(965, 980, "Memory Manager",nullptr,nullptr);
     if (!window) { glfwTerminate(); return -1; }
     glfwMakeContextCurrent(window);
+
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // ImGui init
     IMGUI_CHECKVERSION();
