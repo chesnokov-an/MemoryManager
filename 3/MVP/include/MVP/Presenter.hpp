@@ -22,6 +22,7 @@ public:
     bool add_program(const std::string& name, const std::string& file_path, size_t memory_limit);
     void delete_program(const std::string& name);
     bool make_reference(const std::string& name, const std::string& target_name, const std::string& prog);
+    bool delete_element(const std::string& name, const std::string& prog);
     void defragment();
     std::vector<std::string> errors();
     std::vector<std::string> dungling_reference();

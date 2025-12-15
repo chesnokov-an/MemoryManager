@@ -271,6 +271,31 @@ void View::type_combo(size_t& selected_type){
     }
 }
 
+std::vector<std::string> View::elements_combo(size_t& selected_element
+        , const std::vector<std::string>& programs, size_t& selected_program){
+    std::vector<std::string> elements = programs.empty()
+            ? std::vector<std::string>()
+            : presenter_.get_elements_by_program(programs[selected_program]);
+                
+    if (!programs.empty() && !elements.empty()){
+        std::string elem_name = elements[selected_element];
+        if (ImGui::BeginCombo("Elements", elem_name.c_str())){
+            for (size_t i = 0; i < elements.size(); i++){
+                bool is_selected = (selected_element == i);
+                if (ImGui::Selectable(elements[i].c_str(), is_selected))
+                    selected_element = i;
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+    }
+    else{
+        ImGui::TextDisabled("There are no available elements");
+    }
+    return elements;
+}
+
 void View::render_ui(){
     bool opened = true;
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -499,26 +524,7 @@ void View::render_ui(){
                 std::vector<std::string> programs = program_combo(selected_program);
 
                 static size_t selected_element = 0;
-                std::vector<std::string> elements = programs.empty()
-                        ? std::vector<std::string>()
-                        : presenter_.get_elements_by_program(programs[selected_program]);
-                
-                if (!programs.empty() && !elements.empty()){
-                    std::string elem_name = elements[selected_element];
-                    if (ImGui::BeginCombo("Elements", elem_name.c_str())){
-                        for (size_t i = 0; i < elements.size(); i++){
-                            bool is_selected = (selected_element == i);
-                            if (ImGui::Selectable(elements[i].c_str(), is_selected))
-                                selected_element = i;
-                            if (is_selected)
-                                ImGui::SetItemDefaultFocus();
-                        }
-                        ImGui::EndCombo();
-                    }
-                }
-                else{
-                    ImGui::TextDisabled("There are no available elements");
-                }
+                std::vector<std::string> elements = elements_combo(selected_element, programs, selected_program);
 
                 ImGui::Separator();
 
@@ -551,11 +557,44 @@ void View::render_ui(){
             ImGui::Combo("Element type", &type_id, types, IM_ARRAYSIZE(types));
 
             set_red_button();
-            if (ImGui::Button("Delete element", ImVec2(300, 35)))
-            {
-                // TODO
+            if (ImGui::Button("Delete element", ImVec2(300, 35))){
+                ImGui::OpenPopup("Delete element Popup");
             }
             set_blue_button();
+
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Delete element Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
+                static size_t selected_program = 0;
+                std::vector<std::string> programs = program_combo(selected_program);
+
+                static size_t selected_element = 0;
+                std::vector<std::string> elements = elements_combo(selected_element, programs, selected_program);
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Ok", ImVec2(120, 0))) {
+                    if(programs.empty() || elements.empty()){
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else{
+                        bool great_delete = presenter_.delete_element(elements[selected_element], programs[selected_program]);
+                        std::string message = great_delete ? ("Element " + std::string(elements[selected_element]) + " was deleted")
+                                                        : ("Something went wrong with deleting " + std::string(elements[selected_element]) + "!");
+                        output_buffer.push_back(message);
+                        selected_program = 0;
+                        selected_element = 0;
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    selected_program = 0;
+                    selected_element = 0;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
 
             ImGui::SameLine();
             if (ImGui::Button("Set value", ImVec2(300, 35)))

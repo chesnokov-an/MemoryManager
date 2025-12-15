@@ -29,10 +29,15 @@ namespace MVPNameSpace {
         manager_.delete_program(name);
     }
 
-    bool  Presenter::make_reference(const std::string& name, const std::string& target_name, const std::string& prog){
+    bool Presenter::make_reference(const std::string& name, const std::string& target_name, const std::string& prog){
         auto it = manager_.get_programs().find(prog);
         ReferenceDescriptor* reference = it->second->make_reference(name, target_name);
         return (reference != nullptr);
+    }
+
+    bool Presenter::delete_element(const std::string& name, const std::string& prog){
+        auto it = manager_.get_programs().find(prog);
+        return it->second->destroy_element(name);
     }
 
     void Presenter::defragment(){
