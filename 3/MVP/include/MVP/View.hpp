@@ -14,6 +14,9 @@ class View final {
 private:
     Presenter& presenter_;
 
+    std::vector<std::string> program_combo(size_t& selected_program);
+    void type_combo(size_t& selected_type);
+
 public:
     View(Presenter& presenter) : presenter_(presenter) {}
     void render_ui();

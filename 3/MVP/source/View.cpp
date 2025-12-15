@@ -120,6 +120,40 @@ static const char* DataTypeNames[] = {
 
 std::vector<std::string> output_buffer;
 
+std::vector<std::string> View::program_combo(size_t& selected_program){
+    std::vector<std::string> programs = presenter_.get_programs_names();
+    if (!programs.empty()){
+        std::string prog_name = programs[selected_program];
+        if (ImGui::BeginCombo("Program", prog_name.c_str())){
+            for (size_t i = 0; i < programs.size(); i++){
+                bool is_selected = (selected_program == i);
+                if (ImGui::Selectable(programs[i].c_str(), is_selected))
+                    selected_program = i;
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+    }
+    else{
+        ImGui::TextDisabled("There are no available programs");
+    }
+    return programs;
+}
+
+void View::type_combo(size_t& selected_type){
+    if (ImGui::BeginCombo("Type", DataTypeNames[selected_type])){
+        for (size_t i = 0; i < IM_ARRAYSIZE(DataTypeNames); i++){
+            bool is_selected = (selected_type == i);
+            if (ImGui::Selectable(DataTypeNames[i], is_selected))
+                selected_type = i;
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+}
+
 void View::render_ui(){
     bool opened = true;
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -160,38 +194,12 @@ void View::render_ui(){
                 static size_t selected_type = 0;
                 ImGui::InputText("Name", var_name, IM_ARRAYSIZE(var_name));
 
-                ImGui::Text("Type");
-                if (ImGui::BeginCombo("##datatype", DataTypeNames[selected_type])){
-                    for (size_t i = 0; i < IM_ARRAYSIZE(DataTypeNames); i++){
-                        bool is_selected = (selected_type == i);
-                        if (ImGui::Selectable(DataTypeNames[i], is_selected))
-                            selected_type = i;
-                        if (is_selected)
-                            ImGui::SetItemDefaultFocus();
-                    }
-                    ImGui::EndCombo();
-                }
+                type_combo(selected_type);
 
                 ImGui::Separator();
 
                 static size_t selected_program = 0;
-                std::vector<std::string> programs = presenter_.get_programs_names();
-                if (!programs.empty()){
-                    std::string prog_name = programs[selected_program];
-                    if (ImGui::BeginCombo("Program", prog_name.c_str())){
-                        for (size_t i = 0; i < programs.size(); i++){
-                            bool is_selected = (selected_program == i);
-                            if (ImGui::Selectable(programs[i].c_str(), is_selected))
-                                selected_program = i;
-                            if (is_selected)
-                                ImGui::SetItemDefaultFocus();
-                        }
-                        ImGui::EndCombo();
-                    }
-                }
-                else{
-                    ImGui::TextDisabled("There are no available programs");
-                }
+                std::vector<std::string> programs = program_combo(selected_program);
 
                 ImGui::Separator();
 
@@ -204,35 +212,216 @@ void View::render_ui(){
                         bool great_add = false;
                         switch (type){
                         case DataType::Bool:
-                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(bool));
+                            great_add = presenter_.allocate_variable<bool>(programs[selected_program], var_name);
                             break;
                         case DataType::Char:
-                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(char));
+                            great_add = presenter_.allocate_variable<char>(programs[selected_program], var_name);
                             break;
                         case DataType::Int:
-                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(int));
+                            great_add = presenter_.allocate_variable<int>(programs[selected_program], var_name);
                             break;
                         case DataType::LongLong:
-                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(long long));
+                            great_add = presenter_.allocate_variable<long long>(programs[selected_program], var_name);
                             break;
                         case DataType::SizeT:
-                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(size_t));
+                            great_add = presenter_.allocate_variable<size_t>(programs[selected_program], var_name);
                             break;
                         case DataType::Double:
-                            great_add = presenter_.allocate_variable(programs[selected_program], var_name, sizeof(double));
+                            great_add = presenter_.allocate_variable<double>(programs[selected_program], var_name);
                             break;
                         }
 
                         std::string message = great_add ? ("Variable " + std::string(var_name) + " was allocated")
                                                         : ("Something went wrong with allocating " + std::string(var_name) + "!");
                         output_buffer.push_back(message);
-
+                        selected_program = 0;
                         ImGui::CloseCurrentPopup();
                     }
                 }
                 ImGui::SameLine();
 
                 if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    selected_program = 0;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
+
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Create Array Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
+                static char var_name[128] = "";
+                static size_t selected_type = 0;
+                static size_t count_elements = 0;
+                ImGui::InputText("Name", var_name, IM_ARRAYSIZE(var_name));
+                ImGui::InputScalar("Number of elements", ImGuiDataType_U64, &count_elements);
+
+                type_combo(selected_type);
+
+                ImGui::Separator();
+
+                static size_t selected_program = 0;
+                std::vector<std::string> programs = program_combo(selected_program);
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Ok", ImVec2(120, 0))) {
+                    if(programs.empty()){
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else{
+                        DataType type = static_cast<DataType>(selected_type);
+                        bool great_add = false;
+                        switch (type){
+                        case DataType::Bool:
+                            great_add = presenter_.allocate_array<bool>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::Char:
+                            great_add = presenter_.allocate_array<char>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::Int:
+                            great_add = presenter_.allocate_array<int>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::LongLong:
+                            great_add = presenter_.allocate_array<long long>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::SizeT:
+                            great_add = presenter_.allocate_array<size_t>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::Double:
+                            great_add = presenter_.allocate_array<double>(programs[selected_program], var_name, count_elements);
+                            break;
+                        }
+
+                        std::string message = great_add ? ("Array " + std::string(var_name) + " was allocated")
+                                                        : ("Something went wrong with allocating " + std::string(var_name) + "!");
+                        output_buffer.push_back(message);
+                        selected_program = 0;
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    selected_program = 0;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
+
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Create SharedSegment Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
+                static char var_name[128] = "";
+                static size_t selected_type = 0;
+                static size_t count_elements = 0;
+                ImGui::InputText("Name", var_name, IM_ARRAYSIZE(var_name));
+                ImGui::InputScalar("Number of elements", ImGuiDataType_U64, &count_elements);
+
+                type_combo(selected_type);
+
+                ImGui::Separator();
+
+                static size_t selected_program = 0;
+                std::vector<std::string> programs = program_combo(selected_program);
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Ok", ImVec2(120, 0))) {
+                    if(programs.empty()){
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else{
+                        DataType type = static_cast<DataType>(selected_type);
+                        bool great_add = false;
+                        switch (type){
+                        case DataType::Bool:
+                            great_add = presenter_.allocate_shared<bool>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::Char:
+                            great_add = presenter_.allocate_shared<char>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::Int:
+                            great_add = presenter_.allocate_shared<int>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::LongLong:
+                            great_add = presenter_.allocate_shared<long long>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::SizeT:
+                            great_add = presenter_.allocate_shared<size_t>(programs[selected_program], var_name, count_elements);
+                            break;
+                        case DataType::Double:
+                            great_add = presenter_.allocate_shared<double>(programs[selected_program], var_name, count_elements);
+                            break;
+                        }
+
+                        std::string message = great_add ? ("Shared segment " + std::string(var_name) + " was allocated")
+                                                        : ("Something went wrong with allocating " + std::string(var_name) + "!");
+                        output_buffer.push_back(message);
+                        selected_program = 0;
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    selected_program = 0;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
+
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Create Reference Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
+                static char ref_name[128] = "";
+                ImGui::InputText("Name", ref_name, IM_ARRAYSIZE(ref_name));
+
+                ImGui::Separator();
+
+                static size_t selected_program = 0;
+                std::vector<std::string> programs = program_combo(selected_program);
+
+                static size_t selected_element = 0;
+                std::vector<std::string> elements = programs.empty()
+                        ? std::vector<std::string>()
+                        : presenter_.get_elements_by_program(programs[selected_program]);
+                
+                if (!programs.empty() && !elements.empty()){
+                    std::string elem_name = elements[selected_element];
+                    if (ImGui::BeginCombo("Elements", elem_name.c_str())){
+                        for (size_t i = 0; i < elements.size(); i++){
+                            bool is_selected = (selected_element == i);
+                            if (ImGui::Selectable(elements[i].c_str(), is_selected))
+                                selected_element = i;
+                            if (is_selected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+                }
+                else{
+                    ImGui::TextDisabled("There are no available elements");
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Ok", ImVec2(120, 0))) {
+                    if(programs.empty() || elements.empty()){
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else{
+                        bool great_add = presenter_.make_reference(ref_name, elements[selected_element], programs[selected_program]);
+                        std::string message = great_add ? ("Reference " + std::string(ref_name) + " was created")
+                                                        : ("Something went wrong with creating " + std::string(ref_name) + "!");
+                        output_buffer.push_back(message);
+                        selected_program = 0;
+                        selected_element = 0;
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    selected_program = 0;
+                    selected_element = 0;
                     ImGui::CloseCurrentPopup();
                 }
                 ImGui::EndPopup();
@@ -321,23 +510,7 @@ void View::render_ui(){
             ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
             if (ImGui::BeginPopupModal("Close Program Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
                 static size_t selected_program = 0;
-                std::vector<std::string> programs = presenter_.get_programs_names();
-                if (!programs.empty()){
-                    std::string prog_name = programs[selected_program];
-                    if (ImGui::BeginCombo("Program", prog_name.c_str())){
-                        for (size_t i = 0; i < programs.size(); i++){
-                            bool is_selected = (selected_program == i);
-                            if (ImGui::Selectable(programs[i].c_str(), is_selected))
-                                selected_program = i;
-                            if (is_selected)
-                                ImGui::SetItemDefaultFocus();
-                        }
-                        ImGui::EndCombo();
-                    }
-                }
-                else{
-                    ImGui::TextDisabled("There are no available programs");
-                }
+                std::vector<std::string> programs = program_combo(selected_program);
 
                 ImGui::Separator();
                 if (ImGui::Button("Ok", ImVec2(120, 0))) {
@@ -346,12 +519,14 @@ void View::render_ui(){
                     }
                     else{
                         presenter_.delete_program(programs[selected_program]);
-                        output_buffer.push_back("Program '" + programs[selected_program] + "' was closed.");
+                        output_buffer.push_back("Program " + programs[selected_program] + " was closed");
+                        selected_program = 0;
                         ImGui::CloseCurrentPopup();
                     }
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    selected_program = 0;
                     ImGui::CloseCurrentPopup();
                 }
                 ImGui::EndPopup();
