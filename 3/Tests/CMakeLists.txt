@@ -25,9 +25,15 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable (Tests   source/main.cpp
-                        source/TestCase.cpp)
+                        source/TestBuffer.cpp
+                        source/TestError.cpp
+                        source/TestManager.cpp
+                        source/TestProgram.cpp
+                        source/TestMemoryElement.cpp
+                        source/TestSharedSegment.cpp
+                        )
 
-target_link_libraries(Tests gtest
+target_link_libraries(Tests Memory
+                            gtest
                             gtest_main
-                            Memory
                             )

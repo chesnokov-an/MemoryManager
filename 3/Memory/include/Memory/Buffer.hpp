@@ -19,7 +19,6 @@ class IBuffer{
 public:
     virtual std::byte* get_data() noexcept = 0;
     virtual const std::byte* get_data() const noexcept = 0;
-    virtual size_t get_size() const noexcept = 0;
     virtual size_t get_capacity() const noexcept = 0;
     virtual size_t allocate_block(size_t size) = 0;
     virtual void destroy_block(size_t offset, size_t size) = 0;
@@ -31,16 +30,14 @@ template<size_t capacity_>
 class Buffer final : public IBuffer{
 private:
     std::array<std::byte, capacity_> buffer_;
-    size_t size_;
     std::vector<Block> blocks_;
 
 public:
-    Buffer() : IBuffer(), size_(0), blocks_(std::vector<Block>{{0, capacity_}}) {};
+    Buffer() : IBuffer(), blocks_(std::vector<Block>{{0, capacity_}}) {};
     ~Buffer() override = default;
     
     std::byte* get_data() noexcept override { return buffer_.data(); }
     const std::byte* get_data() const noexcept override { return buffer_.data(); }
-    size_t get_size() const noexcept override { return size_; }
     constexpr size_t get_capacity() const noexcept override { return capacity_; }
     
     size_t allocate_block(size_t size) override {

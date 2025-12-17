@@ -13,3 +13,6 @@ file(GLOB MEMORY_SOURCES
 
 add_library(Memory STATIC ${MEMORY_SOURCES})
 target_include_directories(Memory PUBLIC include)
+
+target_compile_options(Memory PRIVATE --coverage)
+target_link_options(Memory PRIVATE --coverage)
