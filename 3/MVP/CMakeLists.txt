@@ -40,7 +40,7 @@ file(GLOB MVP_SOURCES
 
 add_library(MVP STATIC ${MVP_SOURCES})
 target_include_directories(MVP PUBLIC include)
-target_link_libraries(MVP PUBLIC Memory Utils imgui ${GLFW_LIBRARIES} OpenGL::GL)
+target_link_libraries(MVP PUBLIC Memory imgui ${GLFW_LIBRARIES} OpenGL::GL)
 
 target_include_directories(MVP PUBLIC
     ${GLFW_INCLUDE_DIRS}
