@@ -50,15 +50,6 @@ bool Program::possible_for_expansion(size_t size) const {
     return true;
 }
 
-// size_t Program::get_used_memory() const {
-//     size_t res = 0;
-//     for(auto&& [name, ptr] : memory_elements_){
-//         if(!ptr->is_reference())
-//             res += ptr->get_size();
-//     }
-//     return res;
-// }
-
 size_t Program::get_used_memory() const {
     return std::transform_reduce(
         std::execution::par,
