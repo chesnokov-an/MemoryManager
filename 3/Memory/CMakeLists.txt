@@ -12,6 +12,10 @@ file(GLOB MEMORY_SOURCES
 )
 
 add_library(Memory STATIC ${MEMORY_SOURCES})
+
+find_package(TBB REQUIRED)
+target_link_libraries(Memory PRIVATE TBB::tbb)
+
 target_include_directories(Memory PUBLIC include)
 
 target_compile_options(Memory PUBLIC --coverage)
