@@ -18,6 +18,9 @@ private:
     void type_combo(size_t& selected_type);
     std::vector<std::string> elements_combo(size_t& selected_element,
             const std::vector<std::string>& programs, size_t& selected_program);
+    std::vector<std::string> segments_combo(size_t& selected_segment);
+    std::vector<std::string> segments_combo(size_t& selected_segment,
+            const std::vector<std::string>& programs, size_t& selected_program);
 
 public:
     View(Presenter& presenter) : presenter_(presenter) {}

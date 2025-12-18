@@ -238,15 +238,16 @@ static const char* DataTypeNames[] = {
 std::vector<std::string> output_buffer;
 
 std::vector<std::string> View::program_combo(size_t& selected_program, size_t* selected_element){
-    if(selected_element != nullptr) *selected_element = 0;
     std::vector<std::string> programs = presenter_.get_programs_names();
     if (!programs.empty()){
         std::string prog_name = programs[selected_program];
         if (ImGui::BeginCombo("Program", prog_name.c_str())){
             for (size_t i = 0; i < programs.size(); i++){
                 bool is_selected = (selected_program == i);
-                if (ImGui::Selectable(programs[i].c_str(), is_selected))
+                if (ImGui::Selectable(programs[i].c_str(), is_selected)){
                     selected_program = i;
+                    if(selected_element != nullptr) *selected_element = 0;
+                }
                 if (is_selected)
                     ImGui::SetItemDefaultFocus();
             }
@@ -296,6 +297,54 @@ std::vector<std::string> View::elements_combo(size_t& selected_element
     }
     return elements;
 }
+
+std::vector<std::string> View::segments_combo(size_t& selected_segment){
+    std::vector<std::string> segments = presenter_.get_segments();
+    if (!segments.empty()){
+        std::string segment_name = segments[selected_segment];
+        if (ImGui::BeginCombo("Segments", segment_name.c_str())){
+            for (size_t i = 0; i < segments.size(); i++){
+                bool is_selected = (selected_segment == i);
+                if (ImGui::Selectable(segments[i].c_str(), is_selected))
+                    selected_segment = i;
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+    }
+    else{
+        ImGui::TextDisabled("There are no available segments");
+    }
+    return segments;
+}
+
+std::vector<std::string> View::segments_combo(size_t& selected_segment
+        , const std::vector<std::string>& programs, size_t& selected_program){
+    std::vector<std::string> segments = programs.empty()
+            ? std::vector<std::string>()
+            : presenter_.get_segments(programs[selected_program]);
+
+    if (!programs.empty() && !segments.empty()){
+        std::string elem_name = segments[selected_segment];
+        if (ImGui::BeginCombo("Segments", elem_name.c_str())){
+            for (size_t i = 0; i < segments.size(); i++){
+                bool is_selected = (selected_segment == i);
+                if (ImGui::Selectable(segments[i].c_str(), is_selected))
+                    selected_segment = i;
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+    }
+    else{
+        ImGui::TextDisabled("There are no available segments");
+    }
+    return segments;
+}
+
+
 
 void View::render_ui(){
     bool opened = true;
@@ -612,15 +661,79 @@ void View::render_ui(){
             ImGui::Text("Segment access");
             ImGui::Separator();
 
-            if (ImGui::Button("Request segment access", ImVec2(300, 35)))
-            {
-                // TODO
+            if (ImGui::Button("Request access", ImVec2(300, 35))){
+                ImGui::OpenPopup("Request access Popup");
+            }
+
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Request access Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
+                static size_t selected_segment = 0;
+                static size_t selected_program = 0;
+                std::vector<std::string> segments = segments_combo(selected_segment);
+                std::vector<std::string> programs = program_combo(selected_program, &selected_segment);
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Ok", ImVec2(120, 0))) {
+                    if(programs.empty() || segments.empty()){
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else{
+                        bool great_add = presenter_.request_access(segments[selected_segment], programs[selected_program]);
+                        std::string message = great_add ? ("The program " + programs[selected_program] + " has gained access to " + segments[selected_segment])
+                                                        : ("Something went wrong when giving the " + programs[selected_program] + " access to " + segments[selected_segment] + "!");
+                        output_buffer.push_back(message);
+                        selected_program = 0;
+                        selected_segment = 0;
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    selected_program = 0;
+                    selected_segment = 0;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
             }
 
             ImGui::SameLine();
-            if (ImGui::Button("Revoke access", ImVec2(300, 35)))
-            {
-                // TODO
+            if (ImGui::Button("Revoke access", ImVec2(300, 35))){
+                ImGui::OpenPopup("Revoke access Popup");
+            }
+
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Revoke access Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
+                static size_t selected_program = 0;
+                static size_t selected_segment = 0;
+                std::vector<std::string> programs = program_combo(selected_program, &selected_segment);
+                std::vector<std::string> segments = segments_combo(selected_segment, programs, selected_program);
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Ok", ImVec2(120, 0))) {
+                    if(programs.empty() || segments.empty()){
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else{
+                        bool great_add = presenter_.revoke_access(segments[selected_segment], programs[selected_program]);
+                        std::string message = great_add ? ("The program " + programs[selected_program] + " has revoked access to " + segments[selected_segment])
+                                                        : ("Something went wrong when revoking access to " + segments[selected_segment] + " for " + programs[selected_program] + "!");
+                        output_buffer.push_back(message);
+                        selected_program = 0;
+                        selected_segment = 0;
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    selected_program = 0;
+                    selected_segment = 0;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
             }
 
             ImGui::Spacing();

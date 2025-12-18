@@ -1,6 +1,8 @@
 #include <Memory/Program.hpp>
 #include <Memory/Manager.hpp>
 #include <iostream>
+#include <execution>
+#include <numeric>
 
 namespace MemoryNameSpace{
 
@@ -9,7 +11,7 @@ const std::string& Program::get_name() const {
 }
 
 void Program::insert_element(IMemoryElement* element){
-    memory_elements_.emplace(element->get_name(), element);
+    memory_elements_.try_emplace(element->get_name(), element);
 }
 
 void Program::erase_element(IMemoryElement* element){
@@ -48,14 +50,31 @@ bool Program::possible_for_expansion(size_t size) const {
     return true;
 }
 
+// size_t Program::get_used_memory() const {
+//     size_t res = 0;
+//     for(auto&& [name, ptr] : memory_elements_){
+//         if(!ptr->is_reference())
+//             res += ptr->get_size();
+//     }
+//     return res;
+// }
+
 size_t Program::get_used_memory() const {
-    size_t res = 0;
-    for(auto&& [name, ptr] : memory_elements_){
-        if(!ptr->is_reference())
-            res += ptr->get_size();
-    }
-    return res;
+    return std::transform_reduce(
+        std::execution::par,
+        memory_elements_.begin(),
+        memory_elements_.end(),
+        size_t{0},
+        std::plus<>{},
+        [](const auto& pair) -> size_t {
+            const auto& ptr = pair.second;
+            if (!ptr->is_reference())
+                return ptr->get_size();
+            return 0;
+        }
+    );
 }
+
 
 const std::unordered_map<std::string, IMemoryElement*>& Program::get_memory_elements() const noexcept {
     return memory_elements_;

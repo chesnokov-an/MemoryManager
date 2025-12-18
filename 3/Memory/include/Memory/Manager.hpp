@@ -85,7 +85,7 @@ public:
     Manager() : IManager(), buffer_(std::unique_ptr<IBuffer>{new Buffer<capacity_>{}}) {};
 
     void insert_element(IMemoryElement* element) override {
-        memory_elements_.emplace(element->get_name(), std::unique_ptr<IMemoryElement>(element));
+        memory_elements_.try_emplace(element->get_name(), std::unique_ptr<IMemoryElement>(element));
     }
 
     void erase_element(IMemoryElement* element) override {
@@ -105,7 +105,7 @@ public:
             return nullptr;
         }
         ReferenceDescriptor* reference = new ReferenceDescriptor{element->make_reference(name)};
-        memory_elements_.emplace(name, std::unique_ptr<IMemoryElement>(reference));
+        memory_elements_.try_emplace(name, std::unique_ptr<IMemoryElement>(reference));
         return reference;
     }
 
@@ -147,7 +147,10 @@ public:
         if(is_correct_shared_with_error(prog_name, segment_name) == false) return false;
         Program* prog = programs_.find(prog_name)->second.get();
         SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(memory_elements_.find(segment_name)->second.get());
-        if(prog->possible_for_expansion(segment->get_size()) == false) return false;
+        if(prog->possible_for_expansion(segment->get_size()) == false){
+            record_error(SIZE_ERROR, "The memory limit in the '" + segment->get_name() + "' program has been exceeded.", prog_name);
+            return false;
+        }
         prog->insert_element(segment);
         segment->insert_program(prog);
         return true;

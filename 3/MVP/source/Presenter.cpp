@@ -20,6 +20,29 @@ namespace MVPNameSpace {
         return names;
     }
 
+    std::vector<std::string> Presenter::get_segments(){
+        auto elements = manager_.get_memory_elements();
+        std::vector<std::string> segments;
+        for(auto&& [name, ptr] : elements){
+            SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(ptr);
+            if(segment)
+                segments.push_back(segment->get_name());
+        }
+        return segments;
+    }
+
+    std::vector<std::string> Presenter::get_segments(const std::string& prog){
+        auto it = manager_.get_programs().find(prog);
+        auto elements = it->second->get_memory_elements();
+        std::vector<std::string> segments;
+        for(auto&& [name, ptr] : elements){
+            SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(ptr);
+            if(segment)
+                segments.push_back(segment->get_name());
+        }
+        return segments;
+    }
+
     bool Presenter::add_program(const std::string& name, const std::string& file_path, size_t memory_limit){
         Program* prog = manager_.add_program(name, file_path, memory_limit);
         return (prog != nullptr);
@@ -38,6 +61,14 @@ namespace MVPNameSpace {
     bool Presenter::delete_element(const std::string& name, const std::string& prog){
         auto it = manager_.get_programs().find(prog);
         return it->second->destroy_element(name);
+    }
+
+    bool Presenter::request_access(const std::string& segment, const std::string& program){
+        return manager_.get_access_to_shared(program, segment);
+    }
+
+    bool Presenter::revoke_access(const std::string& segment, const std::string& program){
+        return manager_.revoke_access_to_shared(program, segment);
     }
 
     void Presenter::defragment(){

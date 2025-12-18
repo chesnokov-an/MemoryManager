@@ -19,10 +19,14 @@ public:
     Presenter(IManager& manager) : manager_(manager) {}
     std::vector<std::string> get_programs_names();
     std::vector<std::string> get_elements_by_program(const std::string& prog);
+    std::vector<std::string> get_segments();
+    std::vector<std::string> get_segments(const std::string& prog);
     bool add_program(const std::string& name, const std::string& file_path, size_t memory_limit);
     void delete_program(const std::string& name);
     bool make_reference(const std::string& name, const std::string& target_name, const std::string& prog);
     bool delete_element(const std::string& name, const std::string& prog);
+    bool request_access(const std::string& segment, const std::string& program);
+    bool revoke_access(const std::string& segment, const std::string& program);
     void defragment();
     void statistics(std::vector<float>& values, std::vector<std::string>& names);
     std::vector<std::string> errors();
