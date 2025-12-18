@@ -82,8 +82,12 @@ const std::unordered_map<std::string, IMemoryElement*>& Program::get_memory_elem
 
 Program::~Program(){
     for(auto&& [name, ptr] : memory_elements_){
-        if(!ptr->is_reference())
+        SharedSegmentDescriptor* segment = dynamic_cast<SharedSegmentDescriptor*>(ptr);
+        if(!ptr->is_reference() && !segment)
             manager_.record_error(MEMORY_LEAK, "The element '" + name + "' is still reachable.", name_);
+        if(segment)
+            segment->erase_program(this);
+            
     }
 }
 
