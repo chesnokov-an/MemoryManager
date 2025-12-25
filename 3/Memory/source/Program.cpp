@@ -3,6 +3,9 @@
 #include <iostream>
 #include <execution>
 #include <numeric>
+#include <ranges>
+#include <thread>
+#include <future>
 
 namespace MemoryNameSpace{
 
@@ -50,22 +53,31 @@ bool Program::possible_for_expansion(size_t size) const {
     return true;
 }
 
-size_t Program::get_used_memory() const {
-    return std::transform_reduce(
-        std::execution::par,
-        memory_elements_.begin(),
-        memory_elements_.end(),
-        size_t{0},
-        std::plus<>{},
-        [](const auto& pair) -> size_t {
-            const auto& ptr = pair.second;
-            if (!ptr->is_reference())
-                return ptr->get_size();
-            return 0;
-        }
-    );
-}
+// size_t Program::get_used_memory() const {
+    // auto range = memory_elements_ | std::views::values;
+    // std::vector<IMemoryElement*> vec(range.begin(), range.end());
+    // return std::transform_reduce(std::execution::par, vec.begin(), vec.end(), size_t{0}, std::plus<>{},
+    //     [](const auto& ptr) -> size_t {
+    //         return ptr->is_reference() ? 0 : ptr->get_size();
+    //     }
+    // );
 
+    // return std::transform_reduce(std::execution::par, memory_elements_.begin(), memory_elements_.end(), size_t{0}, std::plus<>{},
+    //     [](const auto& pair) -> size_t {
+    //         std::cout << std::this_thread::get_id() << std::endl;
+    //         return pair.second->is_reference() ? 0 : pair.second->get_size();
+    //     }
+    // );
+// }
+
+size_t Program::get_used_memory() const {
+    size_t res = 0;
+    for(auto&& [name, ptr] : memory_elements_){
+        if(!ptr->is_reference())
+            res += ptr->get_size();
+    }
+    return res;
+}
 
 const std::unordered_map<std::string, IMemoryElement*>& Program::get_memory_elements() const noexcept {
     return memory_elements_;
