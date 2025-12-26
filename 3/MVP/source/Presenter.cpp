@@ -47,6 +47,45 @@ namespace MVPNameSpace {
         return elements_types.find(name)->second;
     }
 
+    std::string Presenter::get_value(const std::string& name, size_t begin, size_t end){
+        DataType type = elements_types.find(name)->second;
+        switch (type){
+        case DataType::Bool:{
+            bool val = false;
+            manager_.get_memory_elements().find(name)->second->get_value(val, begin, end);
+            return std::to_string(val);
+            break;}
+        case DataType::Char:{
+            char val = ' ';
+            manager_.get_memory_elements().find(name)->second->get_value(val, begin, end);
+            return std::to_string(val);
+            break;}
+        case DataType::Int:{
+            int val = 0;
+            manager_.get_memory_elements().find(name)->second->get_value(val, begin, end);
+            return std::to_string(val);
+            break;}
+        case DataType::LongLong:{
+            long long val = 0;
+            manager_.get_memory_elements().find(name)->second->get_value(val, begin, end);
+            return std::to_string(val);
+            break;}
+        case DataType::SizeT:{
+            size_t val = 0;
+            manager_.get_memory_elements().find(name)->second->get_value(val, begin, end);
+            return std::to_string(val);
+            break;}
+        case DataType::Double:{
+            double val = 0;
+            manager_.get_memory_elements().find(name)->second->get_value(val, begin, end);
+            return std::to_string(val);
+            break;}
+        default:
+            break;
+        }
+        return std::string("BAD TYPE!");
+    }
+
     bool Presenter::is_array(const std::string& name){
         auto it = manager_.get_element(name);
         auto array = dynamic_cast<ArrayDescriptor*>(it);
