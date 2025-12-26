@@ -105,7 +105,7 @@ public:
      * 
      * @return size_t Total used memory in bytes
      */
-    size_t get_used_memory() const;
+    size_t get_used_memory() const noexcept;
     
     /**
      * @brief Gets all memory elements owned by this program

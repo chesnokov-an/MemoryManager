@@ -140,7 +140,7 @@ public:
      * 
      * @return true (ReferenceDescriptor is always a reference)
      */
-    bool is_reference() const override;
+    bool is_reference() const noexcept override;
     
     /**
      * @brief Gets the name of the target element

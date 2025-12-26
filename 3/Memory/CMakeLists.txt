@@ -5,7 +5,7 @@ project(Memory)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -g -DTHREADS")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -g -O3")
 
 file(GLOB MEMORY_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp

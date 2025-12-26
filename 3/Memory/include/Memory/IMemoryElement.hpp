@@ -102,7 +102,7 @@ public:
      * @return true if this is a reference element
      * @return false if this is not a reference element
      */
-    virtual bool is_reference() const = 0;
+    virtual bool is_reference() const noexcept = 0;
     
     /**
      * @brief Virtual destructor for interface

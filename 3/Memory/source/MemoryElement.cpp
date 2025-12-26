@@ -40,7 +40,7 @@ bool MemoryElement::destroy(Program& prog){
     return true;
 }
 
-bool MemoryElement::is_reference() const {
+bool MemoryElement::is_reference() const noexcept {
     return false;
 }
 

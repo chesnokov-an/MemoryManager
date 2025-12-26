@@ -10,36 +10,31 @@
 
 using namespace MemoryNameSpace;
 
-// Простой бенчмарк для метода get_used_memory()
 void simple_benchmark_get_used_memory() {
-    std::cout << "=== Простой бенчмарк метода get_used_memory() ===\n";
+    std::cout << "=== Бенчмарк метода get_used_memory() ===\n";
     
-    // Разные объемы данных для тестирования
-    const std::vector<size_t> element_counts = {100000};
-    const int warmup_runs = 0;
-    const int measured_runs = 1;
+    const std::vector<size_t> element_counts = {1000, 5000, 10000, /*50000, 100000*/};
+    const int warmup_runs = 2;
+    const int measured_runs = 2;
     
-    // Создаем менеджер с большим объемом памяти
-    const size_t total_memory = 1024 * 1024 * 200; // 200 MB
+    const size_t total_memory = 1024 * 1024 * 200;
     Manager<total_memory> manager;
     
-    // Создаем программу
     Program* program = manager.add_program("benchmark", "benchmark.cpp", total_memory);
     if (!program) {
         std::cerr << "Ошибка создания программы!\n";
         return;
     }
     
-    // Случайный генератор для размеров элементов
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<size_t> size_dist(16, 256); // 16-256 байт
+    std::uniform_int_distribution<size_t> size_dist(16, 256);
     
     for (size_t num_elements : element_counts) {
         std::cout << "\nКоличество элементов: " << num_elements << "\n";
         
-        // Создаем элементы
         std::vector<VariableDescriptor*> elements;
+        elements.reserve(num_elements);
         size_t total_expected_memory = 0;
         
         for (size_t i = 0; i < num_elements; ++i) {
@@ -57,13 +52,11 @@ void simple_benchmark_get_used_memory() {
         
         std::cout << "Ожидаемая используемая память: " << total_expected_memory << " байт\n";
         
-        // Прогревочные запуски
         for (int i = 0; i < warmup_runs; ++i) {
             size_t used = program->get_used_memory();
-            (void)used; // Подавляем предупреждение
+            (void)used;
         }
         
-        // Измеряемые запуски
         long long total_time_ns = 0;
         long long min_time_ns = std::numeric_limits<long long>::max();
         long long max_time_ns = 0;
@@ -84,13 +77,12 @@ void simple_benchmark_get_used_memory() {
             if (i == 0) {
                 std::cout << "Фактическая используемая память: " << actual_used_memory << " байт\n";
                 if (actual_used_memory != total_expected_memory) {
-                    std::cout << "⚠️  Расхождение! Ожидалось: " << total_expected_memory 
+                    std::cout << "Расхождение! Ожидалось: " << total_expected_memory 
                               << ", получено: " << actual_used_memory << "\n";
                 }
             }
         }
         
-        // Статистика
         double avg_time_ns = static_cast<double>(total_time_ns) / measured_runs;
         
         std::cout << "Время выполнения (среднее за " << measured_runs << " запусков):\n";
@@ -100,7 +92,6 @@ void simple_benchmark_get_used_memory() {
         std::cout << "  Минимум: " << min_time_ns << " нс\n";
         std::cout << "  Максимум: " << max_time_ns << " нс\n";
         
-        // Очищаем элементы
         for (auto* elem : elements) {
             program->destroy_element(elem->get_name());
         }
@@ -113,12 +104,9 @@ int main() {
     std::cout << "Запуск простого бенчмарка для get_used_memory()\n";
     
     try {
-        simple_benchmark_get_used_memory();
-        
-        // Опционально: дополнительный тест с фиксированным размером
-        // benchmark_fixed_size_elements();
-        
-    } catch (const std::exception& e) {
+        simple_benchmark_get_used_memory(); 
+    }
+    catch (const std::exception& e) {
         std::cerr << "Ошибка: " << e.what() << "\n";
         return 1;
     }

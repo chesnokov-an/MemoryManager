@@ -60,7 +60,7 @@ const std::string& ReferenceDescriptor::get_ref_name() const noexcept {
     return name_;
 }
 
-bool ReferenceDescriptor::is_reference() const {
+bool ReferenceDescriptor::is_reference() const noexcept {
     return true;
 }
 

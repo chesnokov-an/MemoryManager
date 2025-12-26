@@ -112,7 +112,7 @@ public:
      * 
      * @return false (MemoryElement is not a reference)
      */
-    bool is_reference() const override;
+    bool is_reference() const noexcept override;
     
     /**
      * @brief Creates a reference to this memory element

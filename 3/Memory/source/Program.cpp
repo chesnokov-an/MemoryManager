@@ -6,6 +6,9 @@
 #include <ranges>
 #include <thread>
 #include <future>
+#include <tbb/parallel_reduce.h>
+#include <tbb/blocked_range.h>
+#include <tbb/concurrent_vector.h>
 
 namespace MemoryNameSpace{
 
@@ -53,31 +56,88 @@ bool Program::possible_for_expansion(size_t size) const {
     return true;
 }
 
-// size_t Program::get_used_memory() const {
-    // auto range = memory_elements_ | std::views::values;
-    // std::vector<IMemoryElement*> vec(range.begin(), range.end());
-    // return std::transform_reduce(std::execution::par, vec.begin(), vec.end(), size_t{0}, std::plus<>{},
-    //     [](const auto& ptr) -> size_t {
-    //         return ptr->is_reference() ? 0 : ptr->get_size();
-    //     }
-    // );
+// 1 thread
 
-    // return std::transform_reduce(std::execution::par, memory_elements_.begin(), memory_elements_.end(), size_t{0}, std::plus<>{},
-    //     [](const auto& pair) -> size_t {
-    //         std::cout << std::this_thread::get_id() << std::endl;
-    //         return pair.second->is_reference() ? 0 : pair.second->get_size();
-    //     }
-    // );
-// }
-
-size_t Program::get_used_memory() const {
-    size_t res = 0;
-    for(auto&& [name, ptr] : memory_elements_){
-        if(!ptr->is_reference())
-            res += ptr->get_size();
-    }
-    return res;
+size_t Program::get_used_memory() const noexcept {
+    return std::transform_reduce(memory_elements_.begin(), memory_elements_.end(), size_t{0}, std::plus<>{},
+        [](const auto& pair) -> size_t {
+            return pair.second->is_reference() ? 0 : pair.second->get_size();
+        }
+    );
 }
+
+// vector from views
+/*
+size_t Program::get_used_memory() const noexcept {
+    auto range = memory_elements_ | std::views::values;
+    std::vector<IMemoryElement*> vec(range.begin(), range.end());
+    return std::transform_reduce(std::execution::par, vec.begin(), vec.end(), size_t{0}, std::plus<>{},
+        [](const auto& ptr) -> size_t {
+            return ptr->is_reference() ? 0 : ptr->get_size();
+        }
+    );
+}*/
+
+// manual multithreading
+/*
+size_t Program::get_used_memory() const noexcept {
+    using It = decltype(memory_elements_.cbegin());
+    size_t threadNum = std::thread::hardware_concurrency();
+    if (threadNum == 0) threadNum = 64;
+    size_t elements = memory_elements_.size();
+    if (elements == 0) return 0;
+
+    std::vector<size_t> results(threadNum, 0);
+    std::vector<std::thread> threads(threadNum);
+
+    It first = memory_elements_.cbegin();
+    for (size_t i = 0; i < threadNum; ++i) {
+        size_t start_i = i * elements / threadNum;
+        size_t end_i   = (i + 1) * elements / threadNum;
+        It start = std::next(first, start_i);
+        It end   = std::next(first, end_i);
+        threads[i] = std::thread([start, end, &results, i]() {
+            size_t local = 0;
+            for (auto it = start; it != end; ++it) {
+                const auto* ptr = it->second;
+                if (!ptr->is_reference())
+                    local += ptr->get_size();
+            }
+            results[i] = local;
+        });
+    }
+
+    for (auto& th : threads)
+        th.join();
+    return std::accumulate(results.begin(), results.end(), size_t{0});
+}*/
+
+// tbb
+/*
+size_t Program::get_used_memory() const noexcept {
+    tbb::concurrent_vector<IMemoryElement*> elements;
+    elements.reserve(memory_elements_.size());
+    
+    for (const auto& [name, ptr] : memory_elements_) {
+        elements.push_back(ptr);
+    }
+    
+    return tbb::parallel_reduce(
+        tbb::blocked_range<size_t>(0, elements.size()),
+        size_t(0),
+        [&elements](const tbb::blocked_range<size_t>& r, size_t init) {
+            for (size_t i = r.begin(); i != r.end(); ++i) {
+                if (!elements[i]->is_reference())
+                    init += elements[i]->get_size();
+            }
+            return init;
+        },
+        std::plus<size_t>()
+    );
+}*/
+
+
+
 
 const std::unordered_map<std::string, IMemoryElement*>& Program::get_memory_elements() const noexcept {
     return memory_elements_;
