@@ -217,15 +217,6 @@ void SetComfortableLightCreamTheme(){
 const char* types[] = {"variable", "array", "shared segment", "reference"};
 int type_id = 0;
 
-enum class DataType {
-    Bool,
-    Char,
-    Int,
-    LongLong,
-    SizeT,
-    Double
-};
-
 static const char* DataTypeNames[] = {
     "bool",
     "char",
@@ -406,22 +397,22 @@ void View::render_ui(){
                         bool great_add = false;
                         switch (type){
                         case DataType::Bool:
-                            great_add = presenter_.allocate_variable<bool>(programs[selected_program], var_name);
+                            great_add = presenter_.allocate_variable<bool>(programs[selected_program], var_name, DataType::Bool);
                             break;
                         case DataType::Char:
-                            great_add = presenter_.allocate_variable<char>(programs[selected_program], var_name);
+                            great_add = presenter_.allocate_variable<char>(programs[selected_program], var_name, DataType::Char);
                             break;
                         case DataType::Int:
-                            great_add = presenter_.allocate_variable<int>(programs[selected_program], var_name);
+                            great_add = presenter_.allocate_variable<int>(programs[selected_program], var_name, DataType::Int);
                             break;
                         case DataType::LongLong:
-                            great_add = presenter_.allocate_variable<long long>(programs[selected_program], var_name);
+                            great_add = presenter_.allocate_variable<long long>(programs[selected_program], var_name, DataType::LongLong);
                             break;
                         case DataType::SizeT:
-                            great_add = presenter_.allocate_variable<size_t>(programs[selected_program], var_name);
+                            great_add = presenter_.allocate_variable<size_t>(programs[selected_program], var_name, DataType::SizeT);
                             break;
                         case DataType::Double:
-                            great_add = presenter_.allocate_variable<double>(programs[selected_program], var_name);
+                            great_add = presenter_.allocate_variable<double>(programs[selected_program], var_name, DataType::Double);
                             break;
                         }
 
@@ -467,22 +458,22 @@ void View::render_ui(){
                         bool great_add = false;
                         switch (type){
                         case DataType::Bool:
-                            great_add = presenter_.allocate_array<bool>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_array<bool>(programs[selected_program], var_name, count_elements, DataType::Bool);
                             break;
                         case DataType::Char:
-                            great_add = presenter_.allocate_array<char>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_array<char>(programs[selected_program], var_name, count_elements, DataType::Char);
                             break;
                         case DataType::Int:
-                            great_add = presenter_.allocate_array<int>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_array<int>(programs[selected_program], var_name, count_elements, DataType::Int);
                             break;
                         case DataType::LongLong:
-                            great_add = presenter_.allocate_array<long long>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_array<long long>(programs[selected_program], var_name, count_elements, DataType::LongLong);
                             break;
                         case DataType::SizeT:
-                            great_add = presenter_.allocate_array<size_t>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_array<size_t>(programs[selected_program], var_name, count_elements, DataType::SizeT);
                             break;
                         case DataType::Double:
-                            great_add = presenter_.allocate_array<double>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_array<double>(programs[selected_program], var_name, count_elements, DataType::Double);
                             break;
                         }
 
@@ -528,22 +519,22 @@ void View::render_ui(){
                         bool great_add = false;
                         switch (type){
                         case DataType::Bool:
-                            great_add = presenter_.allocate_shared<bool>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_shared<bool>(programs[selected_program], var_name, count_elements, DataType::Bool);
                             break;
                         case DataType::Char:
-                            great_add = presenter_.allocate_shared<char>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_shared<char>(programs[selected_program], var_name, count_elements, DataType::Char);
                             break;
                         case DataType::Int:
-                            great_add = presenter_.allocate_shared<int>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_shared<int>(programs[selected_program], var_name, count_elements, DataType::Int);
                             break;
                         case DataType::LongLong:
-                            great_add = presenter_.allocate_shared<long long>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_shared<long long>(programs[selected_program], var_name, count_elements, DataType::LongLong);
                             break;
                         case DataType::SizeT:
-                            great_add = presenter_.allocate_shared<size_t>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_shared<size_t>(programs[selected_program], var_name, count_elements, DataType::Int);
                             break;
                         case DataType::Double:
-                            great_add = presenter_.allocate_shared<double>(programs[selected_program], var_name, count_elements);
+                            great_add = presenter_.allocate_shared<double>(programs[selected_program], var_name, count_elements, DataType::Double);
                             break;
                         }
 
@@ -646,9 +637,99 @@ void View::render_ui(){
             }
 
             ImGui::SameLine();
-            if (ImGui::Button("Set value", ImVec2(300, 35)))
-            {
-                // TODO
+            if (ImGui::Button("Set value", ImVec2(300, 35))){
+                ImGui::OpenPopup("Set value Popup");
+            }
+
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Set value Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)){
+                static size_t selected_program = 0;
+                static size_t selected_element = 0;
+
+                static bool bool_val = false;
+                static char char_val = ' ';
+                static int int_val = 0;
+                static long long long_val = 0;
+                static size_t size_val = 0;
+                static double double_val = 0;
+
+                std::vector<std::string> programs = program_combo(selected_program, &selected_element);
+                std::vector<std::string> elements = elements_combo(selected_element, programs, selected_program);
+
+                if(!elements.empty()){
+                    switch (presenter_.get_type(elements[selected_element])){
+                    case DataType::Bool:
+                        ImGui::Checkbox("bool", &bool_val);
+                        break;
+                    case DataType::Char:
+                        ImGui::InputScalar("char", ImGuiDataType_S8, &char_val);
+                        break;
+                    case DataType::Int:
+                        ImGui::InputScalar("int", ImGuiDataType_S32, &int_val);
+                        break;
+                    case DataType::LongLong:
+                        ImGui::InputScalar("long long", ImGuiDataType_S64, &long_val);
+                        break;
+                    case DataType::SizeT:
+                        ImGui::InputScalar("size_t", ImGuiDataType_U64, &size_val);
+                        break;
+                    case DataType::Double:
+                        ImGui::InputScalar("double", ImGuiDataType_U32, &double_val);
+                        break;
+                    default:
+                        ImGui::TextDisabled("There are no available elements");
+                        break;
+                    }
+                }
+                
+                static size_t arr_index = 0;
+                if(presenter_.is_array(elements[selected_element]))
+                    ImGui::InputScalar("Index", ImGuiDataType_U64, &arr_index);
+
+                ImGui::Separator();
+
+                if (ImGui::Button("Ok", ImVec2(120, 0))) {
+                    if(programs.empty() || elements.empty()){
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else{
+                        bool great_add = false;
+                        switch (presenter_.get_type(elements[selected_element])){
+                            case DataType::Bool:
+                                great_add = presenter_.set_value(elements[selected_element], bool_val);
+                                break;
+                            case DataType::Char:
+                                great_add = presenter_.set_value(elements[selected_element], char_val);
+                                break;
+                            case DataType::Int:
+                                great_add = presenter_.set_value(elements[selected_element], int_val);
+                                break;
+                            case DataType::LongLong:
+                                great_add = presenter_.set_value(elements[selected_element], long_val);
+                                break;
+                            case DataType::SizeT:
+                                great_add = presenter_.set_value(elements[selected_element], size_val);
+                                break;
+                            case DataType::Double:
+                                great_add = presenter_.set_value(elements[selected_element], double_val);
+                                break;
+                        }
+                        std::string message = great_add ? ("Value for " + std::string(elements[selected_element]) + " was set")
+                                                        : ("Something went wrong with setting value for " + std::string(elements[selected_element]) + "!");
+                        output_buffer.push_back(message);
+                        selected_program = 0;
+                        selected_element = 0;
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::SameLine();
+
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                    selected_program = 0;
+                    selected_element = 0;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
             }
 
             ImGui::SameLine();

@@ -43,6 +43,17 @@ namespace MVPNameSpace {
         return segments;
     }
 
+    DataType Presenter::get_type(const std::string& name){
+        return elements_types.find(name)->second;
+    }
+
+    bool Presenter::is_array(const std::string& name){
+        auto it = manager_.get_element(name);
+        auto array = dynamic_cast<ArrayDescriptor*>(it);
+        if(array) return true;
+        return false;
+    }
+
     bool Presenter::add_program(const std::string& name, const std::string& file_path, size_t memory_limit){
         Program* prog = manager_.add_program(name, file_path, memory_limit);
         return (prog != nullptr);
@@ -55,12 +66,15 @@ namespace MVPNameSpace {
     bool Presenter::make_reference(const std::string& name, const std::string& target_name, const std::string& prog){
         auto it = manager_.get_programs().find(prog);
         ReferenceDescriptor* reference = it->second->make_reference(name, target_name);
+        if(reference != nullptr) elements_types.insert({name, elements_types.find(name)->second});
         return (reference != nullptr);
     }
 
     bool Presenter::delete_element(const std::string& name, const std::string& prog){
         auto it = manager_.get_programs().find(prog);
-        return it->second->destroy_element(name);
+        bool flag = it->second->destroy_element(name);
+        if(flag) elements_types.erase(name);
+        return flag;
     }
 
     bool Presenter::request_access(const std::string& segment, const std::string& program){
