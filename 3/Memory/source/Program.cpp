@@ -93,7 +93,7 @@ size_t Program::get_used_memory() const noexcept {
     It first = memory_elements_.cbegin();
     for (size_t i = 0; i < threadNum; ++i) {
         size_t start_i = i * elements / threadNum;
-        size_t end_i   = (i + 1) * elements / threadNum;
+        size_t end_i = (i + 1) * elements / threadNum;
         It start = std::next(first, start_i);
         It end   = std::next(first, end_i);
         threads[i] = std::thread([start, end, &results, i]() {
@@ -111,33 +111,6 @@ size_t Program::get_used_memory() const noexcept {
         th.join();
     return std::accumulate(results.begin(), results.end(), size_t{0});
 }*/
-
-// tbb
-/*
-size_t Program::get_used_memory() const noexcept {
-    tbb::concurrent_vector<IMemoryElement*> elements;
-    elements.reserve(memory_elements_.size());
-    
-    for (const auto& [name, ptr] : memory_elements_) {
-        elements.push_back(ptr);
-    }
-    
-    return tbb::parallel_reduce(
-        tbb::blocked_range<size_t>(0, elements.size()),
-        size_t(0),
-        [&elements](const tbb::blocked_range<size_t>& r, size_t init) {
-            for (size_t i = r.begin(); i != r.end(); ++i) {
-                if (!elements[i]->is_reference())
-                    init += elements[i]->get_size();
-            }
-            return init;
-        },
-        std::plus<size_t>()
-    );
-}*/
-
-
-
 
 const std::unordered_map<std::string, IMemoryElement*>& Program::get_memory_elements() const noexcept {
     return memory_elements_;

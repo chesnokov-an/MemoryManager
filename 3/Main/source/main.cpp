@@ -1,9 +1,5 @@
 #include <iostream>
 #include <Memory/Manager.hpp>
-#include <Memory/VariableDescriptor.hpp>
-#include <Memory/ArrayDescriptor.hpp>
-#include <Memory/SharedSegmentDescriptor.hpp>
-#include <Memory/Program.hpp>
 #include <MVP/View.hpp>
 #include <MVP/Presenter.hpp>
 
