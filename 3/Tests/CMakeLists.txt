@@ -1,0 +1,39 @@
+cmake_minimum_required(VERSION 3.16)
+project(Tests)
+
+set(CMAKE_CXX_STANDARD 23)
+
+add_compile_options(--coverage)
+add_link_options(--coverage)
+
+if(UNIX)
+    set(gtest_source_url https://github.com/google/googletest/archive/release-1.11.0.tar.gz)
+elseif(WIN32)
+    set(gtest_source_url https://github.com/google/googletest/archive/release-1.11.0.zip)
+else()
+    message(FATAL_ERROR "The operating system is not supported")
+endif()
+
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL ${gtest_source_url}
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+add_executable (Tests   source/main.cpp
+                        source/TestBuffer.cpp
+                        source/TestError.cpp
+                        source/TestManager.cpp
+                        source/TestProgram.cpp
+                        source/TestMemoryElement.cpp
+                        source/TestSharedSegment.cpp
+                        )
+
+target_link_libraries(Tests Memory
+                            gtest
+                            gtest_main
+                            )
