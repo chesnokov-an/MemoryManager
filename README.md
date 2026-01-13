@@ -1,32 +1,113 @@
-# Загрузка работ на git.dozen.mephi.ru
-Все работы необходимо загрузить на git.dozen.mephi.ru.
+# Laboratory Work No. 3: Class Hierarchy
+## Variant N: Memory Manager
 
-Для допуска к экзамену ВСЕ сданные вами работы должны быть загружены.
+### 📘 Project Description
+This project implements a **system of automatic memory management** allocated to running programs.
+Physically, memory is represented by a **single fixed-size array** that is shared by all programs.
+The system supports working with different types of memory elements, error tracking, and usage statistics.
 
-Выгрузка работ будет проводиться программой, поэтому необходимо строго соблюдать следующий шаблон:
-- внутри репозитория каталоги называются по номеру работы (1, 2, 3);
-- исходный код доп. задания "прикладная программа" по ЛР 2 загружать в каталог 2ex;
-- исходный код доп. задания "плагин" по ЛР 3 загружать в каталог 3ex;
-- внутри каждой из директорий должен лежать код только соответствующей работы;
-- если какой-то из работ нету, то каталог с этой работой не создавайте (или оставьте пустой);
-- внутри каталогов с работами допускается наличие поддиректорий;
-- все файлы исходного кода должны иметь расширение .c .h .cpp .hpp .tcc .cc .c++ или .cxx;
-- вместе с файлами исходного кода допускается наличие прочих файлов (исходные данные, рисунки, файлы автосборки), которые имеют расширение строго НЕ из списка, приведенного выше; эти файлы не будут участвовать в проверке на плагиат;
-- в репозитории должны отсутствовать большие файлы (размер одной ЛР не должен превышать 10MB);
-- в репозитории должны отсутствовать чужие исходные коды (если пользуетесь CMake, ОБЯЗАТЕЛЬНО удаляйте директорию cmake-build-debug, так как в ней есть свои исходники);
-- для продвинутых: допускается использование сабмодулей для аггрегации кода в одном репозитории или из сторонних систем контроля версий.
+---
 
-Внимание!!! Для самостоятельной проверки правильности загрузки работы рекоммендуется использовать следующую команду на сервере samos.dozen.mephi.ru:
-```bash
-check_oop_labs.sh <Путь к каталогу репозитория>
-```
-Например:
-```bash
-check_oop_labs.sh ~/oop2024
-```
+### 🧩 Main Entities
 
-Шаблон для репозитория: https://git.dozen.mephi.ru/oop2024/oop2024_template, его можно скопировать или использовать в качестве шаблона чтобы точно не ошибиться.
+#### 1. Memory Element *(base class)*
+An abstract class describing the common interface of all memory elements.  
+It is extended by creating new descendants (for example, a memory segment of an external device).
 
-Любые отклонения от шаблона эквивалентны отсутствию работы. Ошибочная загрузка не той работы также эквивалентна её отсутствию.
+---
 
-Перечень работ (названия директорий): 1, 2, 2ex, 3, 3ex.
+#### 2. Types of Memory Elements
+
+##### 🔹 Single Variable
+**The descriptor contains:**
+- Variable name  
+- Size of allocated memory  
+- Pointer to the allocated region  
+
+##### 🔹 Array
+**The descriptor contains:**
+- Array name  
+- Total size of allocated memory  
+- Size of a single element  
+- Pointer to the allocated region  
+
+##### 🔹 Shared Memory Segment
+**The descriptor contains:**
+- Segment name  
+- Size of allocated memory  
+- Element size  
+- Pointer to the allocated region  
+- List of programs that have access to the segment  
+
+##### 🔹 Reference
+**The descriptor contains:**
+- Reference name  
+- Pointer to another variable of the same program  
+  or to a shared segment declared in another program  
+
+---
+
+### 🧠 Logical Structure
+
+#### Program Container
+Stores data about all allocated memory regions belonging to a specific program.  
+Provides **access to memory by variable names**.
+
+#### System Table
+Stores data about all registered programs:
+- Path to the executable file  
+- Memory quota (maximum amount that the program can request)  
+- List of data about allocated memory  
+
+The table template class is implemented as a **hash table with separate chaining**.
+
+---
+
+### ⚙️ Main System Functions
+
+#### For a variable:
+- Get value  
+- Change value  
+- Create a reference to the variable  
+
+#### For an array and a shared segment:
+- Get an element value by index  
+- Get values in an index range  
+- Write a new value  
+
+#### For a shared segment:
+- Grant access to a program  
+- Revoke a program’s access to the segment  
+
+#### For a program:
+- Allocate memory of the specified type  
+- Free memory  
+- Get access to an existing shared segment  
+- Display all information about used memory  
+- Display data about shared segments  
+- Calculate the total amount of used memory \*  
+
+\* This operation is implemented in multithreaded mode.  
+Each group of memory elements is processed **in a separate thread**.
+
+#### For the entire system:
+- Display a summary of memory usage  
+- Show the share of memory used by each program  
+- Display memory operation errors (per program and system-wide)  
+- Show invalid references (to freed memory)  
+- Perform **memory defragmentation**
+
+---
+
+### ⚠️ Error Handling
+The system must record and log the following types of errors:
+- Out-of-bounds memory access  
+- Memory leak (repeated allocation without deallocation)  
+- Access by a non-existent identifier  
+- Reference to freed memory  
+
+All errors are stored in a **special error list**.
+
+---
+
+This project uses Dear ImGui and GLFW.
